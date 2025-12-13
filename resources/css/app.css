@@ -1,0 +1,402 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =============== LUXURY THEME LAYERS =============== */
+
+@layer base {
+  :root {
+    /* Brand tokens (primary yellow) */
+    --brand: #facc15;              /* yellow-400 */
+    --brand-2: #fde047;            /* yellow-300 */
+
+    /* Legacy names some components use */
+    --color-brand: var(--brand);
+    --color-brand-soft: var(--brand-2);
+
+    /* Surface tokens used by mega menu + layout */
+    --surface: #020617;            /* close to bg-slate-950 */
+    --thin: rgba(148, 163, 184, 0.35);
+    --header-h: 4rem;              /* matches ~lg navbar height */
+  }
+
+  body {
+    @apply bg-slate-950 text-slate-50 antialiased;
+  }
+}
+
+
+@layer components {
+  /* ---------- Buttons ---------- */
+
+  .btn-gold {
+    @apply inline-flex items-center justify-center rounded-full
+      bg-yellow-400 px-5 py-2 text-sm font-medium text-black
+      shadow-sm transition-colors hover:bg-yellow-300;
+  }
+
+  .btn-outline-gold {
+    @apply inline-flex items-center justify-center rounded-full border
+      border-white/20 px-5 py-2 text-sm font-medium
+      text-slate-100 transition-colors hover:border-yellow-300 hover:text-yellow-300;
+  }
+
+  /* ---------- Navbar / Logo (PUBLIC) ---------- */
+
+  .lux-nav {
+    @apply sticky top-0 z-50 w-full bg-black border-b border-yellow-500/40 backdrop-blur;
+  }
+
+  .lux-nav-inner {
+    @apply mx-auto flex h-14 max-w-7xl items-center justify-between
+      px-4 sm:px-6 lg:h-16 lg:px-8;
+  }
+
+  .lux-logo {
+    @apply inline-flex items-center gap-1 text-xs font-semibold
+      tracking-[0.32em] uppercase;
+  }
+
+  .lux-logo-heir {
+    @apply text-yellow-400 transition-colors;
+  }
+
+  .lux-logo:hover .lux-logo-heir {
+    @apply text-yellow-300;
+  }
+
+  .lux-logo-luxury {
+    @apply text-slate-50;
+  }
+
+  .lux-nav-center-label {
+    @apply hidden lg:inline-block text-xs font-semibold tracking-[0.32em] uppercase text-slate-200;
+  }
+
+  .catalog-toggle {
+    @apply hidden lg:inline-flex items-center gap-2 text-xs font-semibold
+      tracking-[0.32em] uppercase text-slate-200;
+    position: relative;
+  }
+
+  .catalog-toggle:hover {
+    @apply text-yellow-300;
+  }
+
+  .catalog-label {
+    position: relative;
+  }
+
+  .catalog-line {
+    display: block;
+    height: 1px;
+    width: 1.5rem;              /* base line length */
+    background: #eab308;        /* yellow-500 */
+    transform-origin: center;
+    transform: scaleX(.4);      /* start a bit shorter */
+    opacity: .75;
+    transition: transform 150ms ease-out, opacity 150ms ease-out;
+  }
+
+  .catalog-toggle:hover .catalog-line {
+    transform: scaleX(1);       /* grow out from center */
+    opacity: 1;
+  }
+
+
+  /* ---------- Mega menu shell ---------- */
+
+.mega-panel {
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  right: 0;
+  height: calc(100vh - var(--header-h));
+  background: var(--surface);
+  border-top: 1px solid var(--thin);
+  z-index: 60;
+}
+
+.mega-scroll {
+  height: 100%;
+  overflow-y: scroll;      /* always reserve scrollbar, no pop-in */
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+}
+
+
+  /* ========= Mega menu inner layout ========= */
+
+  .mega-shell {
+    /* center under navbar */
+    max-width: 72rem;             /* ≈ Tailwind max-w-7xl */
+    margin: 0 auto;
+    padding: 2.5rem 1rem 3rem;    /* top / x / bottom */
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  /* gender toggle row */
+.mega-genders {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.75rem;
+  font-size: .875rem;
+
+  /* Center horizontally */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+  /* gender buttons */
+  .mega-genders button {
+  position: relative;
+  padding-bottom: .35rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-weight: 500;
+  font-size: .75rem;
+  color: rgba(255,255,255,.55);
+}
+
+
+  .mega-genders button::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: transparent;
+    transform-origin: center;
+    transform: scaleX(.5);
+    opacity: 0;
+    transition: background-color .15s ease, opacity .15s ease;
+  }
+
+  .mega-genders button.is-active {
+    color: #facc15;               /* brand yellow-400 */
+  }
+
+  .mega-genders button.is-active::after {
+    background: #facc15;
+    opacity: 1;
+  }
+
+  /* columns grid */
+  .mega-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: 3rem;
+    row-gap: 1rem;
+    font-size: .75rem;
+  }
+
+  /* individual column */
+  .mega-col {
+    min-width: 7rem;
+  }
+
+  /* column heading */
+  .mega-col-title {
+    font-size: .7rem;
+    font-weight: 600;
+    letter-spacing: .17em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.6);
+    margin-bottom: .35rem;
+  }
+
+  /* list + links */
+  .mega-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .mega-list li a {
+    display: block;
+    padding: .12rem 0;
+    color: rgba(255,255,255,.8);
+    text-decoration: none;
+    transition: color .12s ease, transform .1s ease;
+  }
+
+  .mega-list li a:hover {
+    color: #facc15;
+    transform: translateX(1px);
+  }
+/* ========= Scrollbars ========= */
+
+html{
+  /* keep the scrollbar width stable even when content height changes */
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+
+  /* existing styling */
+  scrollbar-width: thin;                 /* Firefox */
+  scrollbar-color: var(--brand) transparent;
+}
+
+/* Any inner panel that should use a gold scrollbar */
+.gold-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--brand) transparent;
+}
+
+.gold-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.gold-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.gold-scroll::-webkit-scrollbar-thumb {
+  background: #FFEE58;          /* same gold as page thumb core */
+  border-radius: 9999px;
+}
+
+.gold-scroll::-webkit-scrollbar-thumb:hover {
+  background: #facc15;          /* hover = yellow-400 */
+}
+
+
+
+  /* ---------- Mobile sheet ---------- */
+
+  .mobile-sheet {
+    @apply fixed bottom-0 inset-x-0 z-50 rounded-t-2xl
+      border-t border-yellow-500 bg-slate-950 text-slate-50 shadow-2xl;
+  }
+
+  .mobile-scroll {
+    max-height: calc(100vh - 5rem);
+    overflow-y: auto;
+  }
+
+  /* ---------- Hero frieze (decorative band) ---------- */
+
+  .hero-frieze {
+    position: relative;
+  }
+
+  .hero-frieze::after {
+    content: "";
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    bottom: -1.5rem;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(250, 204, 21, 0.7),
+      transparent
+    );
+  }
+}
+
+/* ---------- Scroll lock when mega menu open ---------- */
+
+/*
+  IMPORTANT:
+  - We do NOT change anything on <html> (no html.is-menu-open).
+  - Scrollbar styling on <html> stays constant, so there is no flash.
+  - We only pin <body> so the background page cannot scroll.
+*/
+
+body.is-menu-open {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;   /* keep the same scrollbar width/behavior */
+}
+
+@layer components {
+  /* ===== Catalog side nav ===== */
+
+  .catalog-sidenav {
+    width: 260px;
+  }
+
+  .catalog-sidenav-inner {
+    max-height: calc(100vh - 9rem); /* below header + breadcrumb */
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
+
+  .side-nav-group + .side-nav-group {
+    margin-top: 1.75rem;
+  }
+
+  .side-nav-toggle {
+    @apply flex items-center justify-between w-full
+      text-xs font-semibold uppercase tracking-[0.22em]
+      text-slate-100;
+  }
+
+  .side-nav-sections {
+    margin-top: 0.5rem;
+  }
+
+  .side-nav-section + .side-nav-section {
+    margin-top: 1.5rem;
+  }
+
+  .side-nav-section-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(148, 163, 184, 0.9);
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+    margin-bottom: 0.25rem;
+  }
+
+  .side-nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .side-nav-link {
+    position: relative;
+    display: block;
+    padding: 0.16rem 0 0.16rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    color: rgba(248, 250, 252, 0.78);
+    text-decoration: none;
+    word-break: break-word;
+    transition: color 0.12s ease, transform 0.08s ease;
+  }
+
+  .side-nav-link:hover {
+    color: #facc15;
+    transform: translateX(1px);
+  }
+
+  .side-nav-link--active {
+    color: #facc15;
+    font-weight: 500;
+  }
+
+  .side-nav-link--active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.18rem;
+    bottom: 0.18rem;
+    width: 2px;
+    border-radius: 9999px;
+    background: #facc15;
+  }
+}
+
+[x-cloak] {
+    display: none !important;
+}

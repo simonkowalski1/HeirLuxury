@@ -1,0 +1,225 @@
+HeirLuxury (root)
++-- app
+¦   +-- Console
+¦   ¦   +-- Commands
+¦   ¦   ¦   +-- BackfillProductSlugs.php
+¦   ¦   ¦   +-- BackfillSlugs.php
+¦   ¦   ¦   +-- ImportLvBags.php
+¦   ¦   +-- Kernel.php
+¦   +-- Http
+¦   ¦   +-- Controllers
+¦   ¦   ¦   +-- Admin
+¦   ¦   ¦   ¦   +-- CategoryController.php
+¦   ¦   ¦   ¦   +-- DashboardController.php
+¦   ¦   ¦   ¦   +-- ProductController.php
+¦   ¦   ¦   +-- Auth
+¦   ¦   ¦   ¦   +-- AuthenticatedSessionController.php
+¦   ¦   ¦   ¦   +-- ConfirmablePasswordController.php
+¦   ¦   ¦   ¦   +-- EmailVerificationNotificationController.php
+¦   ¦   ¦   ¦   +-- EmailVerificationPromptController.php
+¦   ¦   ¦   ¦   +-- NewPasswordController.php
+¦   ¦   ¦   ¦   +-- PasswordController.php
+¦   ¦   ¦   ¦   +-- PasswordResetLinkController.php
+¦   ¦   ¦   ¦   +-- RegisteredUserController.php
+¦   ¦   ¦   ¦   +-- VerifyEmailController.php
+¦   ¦   ¦   +-- CategoryController.php
+¦   ¦   ¦   +-- Controller.php
+¦   ¦   ¦   +-- HomeController.php
+¦   ¦   ¦   +-- InquiryController.php
+¦   ¦   ¦   +-- PageController.php
+¦   ¦   ¦   +-- ProductController.php
+¦   ¦   ¦   +-- ProfileController.php
+¦   ¦   +-- Middleware
+¦   ¦   ¦   +-- AdminMiddleware.php
+¦   ¦   +-- Requests
+¦   ¦   ¦   +-- Auth
+¦   ¦   ¦   ¦   +-- LoginRequest.php
+¦   ¦   ¦   +-- ProfileUpdateRequest.php
+¦   ¦   +-- Kernel.php
+¦   +-- Models
+¦   ¦   +-- Category.php
+¦   ¦   +-- Product.php
+¦   ¦   +-- User.php
+¦   +-- Providers
+¦   ¦   +-- AppServiceProvider.php
+¦   +-- Support
+¦   ¦   +-- Breadcrumbs.php
+¦   +-- View
+¦       +-- Components
+¦           +-- AppLayout.php
+¦           +-- GuestLayout.php
++-- bootstrap
+¦   +-- app.php
+¦   +-- providers.php
++-- config
+¦   +-- app.php
+¦   +-- auth.php
+¦   +-- cache.php
+¦   +-- categories.php
+¦   +-- database.php
+¦   +-- filesystems.php
+¦   +-- logging.php
+¦   +-- mail.php
+¦   +-- products.php
+¦   +-- queue.php
+¦   +-- services.php
+¦   +-- session.php
++-- database
+¦   +-- factories
+¦   ¦   +-- UserFactory.php
+¦   +-- migrations
+¦   ¦   +-- 0001_01_01_000001_create_cache_table.php
+¦   ¦   +-- 0001_01_01_000002_create_jobs_table.php
+¦   ¦   +-- 2025_11_16_150739_add_category_slug_to_products_table.php
+¦   ¦   +-- 2025_11_28_161711_create_sessions_table.php
+¦   ¦   +-- 2025_11_28_163723_add_slug_to_products_table.php
+¦   ¦   +-- 2025_11_29_165108_add_image_to_products_table.php
+¦   ¦   +-- 2025_11_30_194726_create_users_table.php
+¦   ¦   +-- 2025_12_01_015112_create_categories_table.php
+¦   ¦   +-- 2025_12_07_164211_add_image_path_to_products_table.php
+¦   ¦   +-- create
+¦   +-- seeders
+¦   ¦   +-- DatabaseSeeder.php
+¦   +-- .gitignore
+¦   +-- database.sqlite
++-- public
+¦   +-- assets
+¦   +-- icons
+¦   +-- images
+¦   ¦   +-- aaaaaaaaaaaplaceholder-4x3.png
+¦   ¦   +-- images.json
+¦   +-- img
+¦   ¦   +-- telegram.png
+¦   +-- storage
+¦   +-- .htaccess
+¦   +-- favicon.ico
+¦   +-- hot
+¦   +-- index.php
+¦   +-- robots.txt
++-- resources
+¦   +-- css
+¦   ¦   +-- app.css
+¦   +-- js
+¦   ¦   +-- app.js
+¦   ¦   +-- bootstrap.js
+¦   ¦   +-- vite.config.js
+¦   +-- views
+¦       +-- admin
+¦       ¦   +-- categories
+¦       ¦   ¦   +-- create.blade.php
+¦       ¦   ¦   +-- edit.blade.php
+¦       ¦   ¦   +-- index.blade.php
+¦       ¦   +-- layouts
+¦       ¦   ¦   +-- app.blade.php
+¦       ¦   +-- products
+¦       ¦   ¦   +-- _form.blade.php
+¦       ¦   ¦   +-- create.blade.php
+¦       ¦   ¦   +-- edit.blade.php
+¦       ¦   ¦   +-- index.blade.php
+¦       ¦   +-- dashboard.blade.php
+¦       +-- auth
+¦       ¦   +-- confirm-password.blade.php
+¦       ¦   +-- forgot-password.blade.php
+¦       ¦   +-- login.blade.php
+¦       ¦   +-- register.blade.php
+¦       ¦   +-- reset-password.blade.php
+¦       ¦   +-- verify-email.blade.php
+¦       +-- catalog
+¦       ¦   +-- _sidenav.blade.php
+¦       ¦   +-- categories.blade.php
+¦       ¦   +-- link.blade.php
+¦       ¦   +-- mega.blade.php
+¦       ¦   +-- product.blade.php
+¦       ¦   +-- search.blade.php
+¦       +-- categories
+¦       ¦   +-- show.blade.php
+¦       +-- components
+¦       ¦   +-- meta
+¦       ¦   +-- product
+¦       ¦   ¦   +-- card.blade.php
+¦       ¦   ¦   +-- coming-soon.blade.php
+¦       ¦   ¦   +-- gallery.blade.php
+¦       ¦   ¦   +-- info-panel.blade.php
+¦       ¦   ¦   +-- meta.blade.php
+¦       ¦   ¦   +-- recommendations.blade.php
+¦       ¦   +-- application-logo.blade.php
+¦       ¦   +-- auth-session-status.blade.php
+¦       ¦   +-- breadcrumbs.blade.php
+¦       ¦   +-- danger-button.blade.php
+¦       ¦   +-- dropdown.blade.php
+¦       ¦   +-- dropdown-link.blade.php
+¦       ¦   +-- info-panel.blade.php
+¦       ¦   +-- input-error.blade.php
+¦       ¦   +-- input-label.blade.php
+¦       ¦   +-- inquiry-modal.blade.php
+¦       ¦   +-- modal.blade.php
+¦       ¦   +-- nav-link.blade.php
+¦       ¦   +-- primary-button.blade.php
+¦       ¦   +-- responsive-nav-link.blade.php
+¦       ¦   +-- secondary-button.blade.php
+¦       ¦   +-- side-nav.blade.php
+¦       ¦   +-- text-input.blade.php
+¦       +-- contact
+¦       ¦   +-- modal.blade.php
+¦       +-- errors
+¦       ¦   +-- 404.blade.php
+¦       +-- layouts
+¦       ¦   +-- app.blade.php
+¦       ¦   +-- guest.blade.php
+¦       ¦   +-- navbar.blade.php
+¦       ¦   +-- navigation.blade.php
+¦       ¦   +-- public.blade.php
+¦       +-- mail
+¦       ¦   +-- inquiry.blade.php
+¦       +-- partials
+¦       ¦   +-- grouped-catalog.blade.php
+¦       +-- products
+¦       ¦   +-- show.blade.php
+¦       +-- profile
+¦       ¦   +-- partials
+¦       ¦   ¦   +-- delete-user-form.blade.php
+¦       ¦   ¦   +-- update-password-form.blade.php
+¦       ¦   ¦   +-- update-profile-information-form.blade.php
+¦       ¦   +-- edit.blade.php
+¦       +-- vendor
+¦       +-- dashboard.blade.php
+¦       +-- home.blade.php
+¦       +-- welcome.blade.php
++-- routes
+¦   +-- api.php
+¦   +-- auth.php
+¦   +-- console.php
+¦   +-- web.php
++-- tests
+¦   +-- Feature
+¦   ¦   +-- Auth
+¦   ¦   ¦   +-- AuthenticationTest.php
+¦   ¦   ¦   +-- EmailVerificationTest.php
+¦   ¦   ¦   +-- PasswordConfirmationTest.php
+¦   ¦   ¦   +-- PasswordResetTest.php
+¦   ¦   ¦   +-- PasswordUpdateTest.php
+¦   ¦   ¦   +-- RegistrationTest.php
+¦   ¦   +-- ExampleTest.php
+¦   ¦   +-- ProfileTest.php
+¦   +-- Unit
+¦   ¦   +-- ExampleTest.php
+¦   +-- TestCase.php
++-- .editorconfig
++-- .env
++-- .env.example
++-- .gitattributes
++-- .gitignore
++-- artisan
++-- composer.json
++-- composer.lock
++-- heirluxury-update.ps1
++-- npm-deps-heir.json
++-- package.json
++-- package-lock.json
++-- phpunit.xml
++-- postcss.config.js
++-- project-tree.txt
++-- README.md
++-- tailwind.config.js
++-- UPDATE-NOTES.txt
++-- vite.config.js
