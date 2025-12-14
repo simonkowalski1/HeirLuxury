@@ -8,7 +8,7 @@ use App\Models\Product;
 
 class ImportLV extends Command
 {
-    protected $signature = 'import:lv';
+    protected $signature = 'import:lv {--fresh : Delete existing products first}';
     protected $description = 'Import LV product folders into the database';
 
     public function handle()
@@ -20,26 +20,45 @@ class ImportLV extends Command
             return Command::FAILURE;
         }
 
+        // Optional: clear existing products
+        if ($this->option('fresh')) {
+            Product::truncate();
+            $this->warn("Cleared all existing products.");
+        }
+
+        // Map folder names to category slugs
+        $folderToCategorySlug = [
+            'lv-bags-women'    => 'louis-vuitton-women-bags',
+            'lv-shoes-women'   => 'louis-vuitton-women-shoes',
+            'lv-clothes-women' => 'louis-vuitton-women-clothes',
+            'lv-bags-men'      => 'louis-vuitton-men-bags',
+            'lv-shoes-men'     => 'louis-vuitton-men-shoes',
+            'lv-clothes-men'   => 'louis-vuitton-men-clothes',
+        ];
+
         // Get all category folders
         $folders = array_filter(scandir($base), function ($f) use ($base) {
             return $f !== '.' && $f !== '..' && is_dir("$base/$f");
         });
 
         foreach ($folders as $folder) {
-
-            // Expect: lv-{section}-{gender}
-            if (!preg_match('/^lv-([a-z]+)-([a-z]+)$/i', $folder, $m)) {
-                $this->warn("Skipping invalid folder name: $folder");
+            // Check if we have a mapping for this folder
+            if (!isset($folderToCategorySlug[$folder])) {
+                $this->warn("Skipping unknown folder: $folder");
                 continue;
             }
 
-            $section = strtolower($m[1]);  // e.g., clothes, shoes, bags
-            $gender  = strtolower($m[2]);  // men, women
+            $categorySlug = $folderToCategorySlug[$folder];
+            
+            // Extract gender and section from category slug
+            // e.g., louis-vuitton-women-bags -> gender=women, section=bags
+            preg_match('/louis-vuitton-(women|men)-(.+)/', $categorySlug, $matches);
+            $gender  = $matches[1] ?? 'women';
+            $section = $matches[2] ?? 'bags';
 
-            $categorySlug = "{$gender}-{$section}";
             $path = "$base/$folder";
 
-            $this->info("📂 Category: $categorySlug ($folder)");
+            $this->info("📂 Importing: $folder → $categorySlug");
 
             // Scan product folders inside category
             foreach (scandir($path) as $dir) {
@@ -50,24 +69,31 @@ class ImportLV extends Command
 
                 // Collect images
                 $images = array_values(array_filter(scandir($productDir), fn ($f) =>
-                    preg_match('/\.(jpg|jpeg|png)$/i', $f)
+                    preg_match('/\.(jpg|jpeg|png|webp)$/i', $f)
                 ));
 
                 if (empty($images)) {
-                    $this->warn("  ⏭  Skipping $dir — No images");
+                    $this->warn("  ⭕ Skipping $dir — No images");
                     continue;
                 }
 
+                sort($images); // Ensure first image is 0000.jpg or similar
                 $firstImage = $images[0];
 
-                Product::create([
-                    'name'          => $dir,
-                    'slug'          => Str::slug($dir),
-                    'gender'        => $gender,
-                    'section'       => $section,
-                    'category_slug' => $categorySlug,
-                    'image_path'    => "imports/$folder/$dir/$firstImage",
-                ]);
+                Product::updateOrCreate(
+                    [
+                        'category_slug' => $categorySlug,
+                        'name'          => $dir,
+                    ],
+                    [
+                        'slug'       => Str::slug($dir),
+                        'folder'     => $dir,  // ← THIS WAS MISSING!
+                        'gender'     => $gender,
+                        'section'    => $section,
+                        'image'      => $firstImage,
+                        'image_path' => "imports/$folder/$dir/$firstImage",
+                    ]
+                );
 
                 $this->info("  ✔ Imported $dir");
             }

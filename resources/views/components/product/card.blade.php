@@ -23,7 +23,7 @@
     // === Correct href for product page ===
     if ($categorySlug && $slug && Route::has('product.show')) {
         $href = route('product.show', [
-            'categorySlug' => $categorySlug,
+            'category' => $categorySlug,
             'productSlug'  => $slug,
         ]);
     } else {
@@ -34,13 +34,13 @@
 
     // Map category -> base import folder (for when image_path is empty)
     $baseFolder = match ($categorySlug) {
-        'louis-vuitton-women-bags'  => 'lv-bags-women',
-        'louis-vuitton-women-shoes' => 'lv-shoes-women',
-        'lv-women-clothes'          => 'lv-clothes-women',
-        'lv-men-clothes'            => 'lv-clothes-men',
-        'lv-men-shoes'              => 'lv-shoes-men',
-        default                     => null,
-    };
+    'louis-vuitton-women-bags'    => 'lv-bags-women',
+    'louis-vuitton-women-shoes'   => 'lv-shoes-women',
+    'louis-vuitton-women-clothes' => 'lv-clothes-women',
+    'louis-vuitton-men-shoes'     => 'lv-shoes-men',
+    'louis-vuitton-men-clothes'   => 'lv-clothes-men',
+    default                       => null,
+};
 
     $folder    = $val('folder');      // e.g. "LV 0001"
     $imageName = $val('image');      // e.g. "0000.jpg"

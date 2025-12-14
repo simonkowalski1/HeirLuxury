@@ -10,96 +10,96 @@ return [
 
         // ---- Bags ----
         'Bags' => [
-            ['name' => 'All Women Bags', 'href' => '#'],
+            ['name' => 'All Women Bags', 'route' => 'catalog.category', 'params' => ['category' => 'women-bags']],
 
-            ['name' => 'Louis Vuitton Bags', 'route' => 'categories.show', 'params' => ['slug' => 'louis-vuitton-women-bags']],
-            ['name' => 'Chanel Bags',        'route' => 'categories.show', 'params' => ['slug' => 'chanel-bags']],
-            ['name' => 'Dior Bags',          'route' => 'categories.show', 'params' => ['slug' => 'dior-bags']],
-            ['name' => 'Gucci Bags',         'route' => 'categories.show', 'params' => ['slug' => 'gucci-bags']],
-            ['name' => 'Celine Bags',        'route' => 'categories.show', 'params' => ['slug' => 'celine-bags']],
-            ['name' => 'Prada Bags',         'route' => 'categories.show', 'params' => ['slug' => 'prada-bags']],
-            ['name' => 'YSL Bags',           'route' => 'categories.show', 'params' => ['slug' => 'ysl-bags']],
+
+            ['name' => 'Louis Vuitton Bags', 'route' => 'catalog.category', 'params' => ['category' => 'louis-vuitton-women-bags']],
+            ['name' => 'Chanel Bags',        'route' => 'catalog.category', 'params' => ['category' => 'chanel-bags']],
+            ['name' => 'Dior Bags',          'route' => 'catalog.category', 'params' => ['category' => 'dior-bags']],
+            ['name' => 'Gucci Bags',         'route' => 'catalog.category', 'params' => ['category' => 'gucci-bags']],
+            ['name' => 'Celine Bags',        'route' => 'catalog.category', 'params' => ['category' => 'celine-bags']],
+            ['name' => 'Prada Bags',         'route' => 'catalog.category', 'params' => ['category' => 'prada-bags']],
+            ['name' => 'YSL Bags',           'route' => 'catalog.category', 'params' => ['category' => 'ysl-bags']],
         ],
 
         // ---- Shoes ----
         'Shoes' => [
-            ['name' => 'All Women Shoes', 'href' => '#'],
+            ['name' => 'All Women Shoes', 'route' => 'catalog.category', 'params' => ['category' => 'women-shoes']],
 
-            ['name' => 'Louis Vuitton Women Shoes', 'route' => 'categories.show', 'params' => ['slug' => 'louis-vuitton-women-shoes']],
-            ['name' => 'Chanel Women Shoes',        'route' => 'categories.show', 'params' => ['slug' => 'chanel-women-shoes']],
-            ['name' => 'Dior Women Shoes',          'route' => 'categories.show', 'params' => ['slug' => 'dior-women-shoes']],
-            ['name' => 'Gucci Women Shoes',         'route' => 'categories.show', 'params' => ['slug' => 'gucci-women-shoes']],
-            ['name' => 'Celine Women Shoes',        'route' => 'categories.show', 'params' => ['slug' => 'celine-women-shoes']],
-            ['name' => 'Prada Women Shoes',         'route' => 'categories.show', 'params' => ['slug' => 'prada-women-shoes']],
+
+            ['name' => 'Louis Vuitton Women Shoes', 'route' => 'catalog.category', 'params' => ['category' => 'louis-vuitton-women-shoes']],
+            ['name' => 'Chanel Women Shoes',        'route' => 'catalog.category', 'params' => ['category' => 'chanel-women-shoes']],
+            ['name' => 'Dior Women Shoes',          'route' => 'catalog.category', 'params' => ['category' => 'dior-women-shoes']],
+            ['name' => 'Gucci Women Shoes',         'route' => 'catalog.category', 'params' => ['category' => 'gucci-women-shoes']],
+            ['name' => 'Celine Women Shoes',        'route' => 'catalog.category', 'params' => ['category' => 'celine-women-shoes']],
+            ['name' => 'Prada Women Shoes',         'route' => 'catalog.category', 'params' => ['category' => 'prada-women-shoes']],
         ],
 
         // ---- Clothing ----
         'Clothing' => [
-            ['name' => 'All Women Clothing', 'href' => '#'],
+            ['name' => 'All Women Clothing', 'route' => 'catalog.category', 'params' => ['category' => 'women-clothing']],
 
-            ['name' => 'Louis Vuitton Women Clothing', 'route' => 'categories.show', 'params' => ['slug' => 'lv-women-clothes']],
-            ['name' => 'Chanel Women Clothing',        'route' => 'categories.show', 'params' => ['slug' => 'chanel-women-clothes']],
-            ['name' => 'Dior Women Clothing',          'route' => 'categories.show', 'params' => ['slug' => 'dior-women-clothes']],
-            ['name' => 'Gucci Women Clothing',         'route' => 'categories.show', 'params' => ['slug' => 'gucci-women-clothes']],
+            ['name' => 'Louis Vuitton Women Clothing', 'route' => 'catalog.category', 'params' => ['category' => 'louis-vuitton-women-clothes']],
+            ['name' => 'Chanel Women Clothing',        'route' => 'catalog.category', 'params' => ['category' => 'chanel-women-clothes']],
+            ['name' => 'Dior Women Clothing',          'route' => 'catalog.category', 'params' => ['category' => 'dior-women-clothes']],
+            ['name' => 'Gucci Women Clothing',         'route' => 'catalog.category', 'params' => ['category' => 'gucci-women-clothes']],
         ],
 
         // ---- Small Leather Goods ----
         'Small Leather Goods' => [
-            ['name' => 'All Women SLG', 'href' => '#'],
+            ['name' => 'All Women SLG', 'route' => 'catalog.category', 'params' => ['category' => 'women-small-leather-goods']],
 
-            ['name' => 'Wallets',      'route' => 'categories.show', 'params' => ['slug' => 'wallets']],
-            ['name' => 'Card Holders', 'route' => 'categories.show', 'params' => ['slug' => 'card-holders']],
-            ['name' => 'Phone Cases',  'route' => 'categories.show', 'params' => ['slug' => 'phone-cases']],
-            ['name' => 'Key Chains',   'route' => 'categories.show', 'params' => ['slug' => 'key-chains']],
+            ['name' => 'Wallets',      'route' => 'catalog.category', 'params' => ['category' => 'wallets']],
+            ['name' => 'Card Holders', 'route' => 'catalog.category', 'params' => ['category' => 'card-holders']],
+            ['name' => 'Phone Cases',  'route' => 'catalog.category', 'params' => ['category' => 'phone-cases']],
+            ['name' => 'Key Chains',   'route' => 'catalog.category', 'params' => ['category' => 'key-chains']],
         ],
 
         // ---- Accessories ----
         'Accessories' => [
-            ['name' => 'All Women Accessories', 'href' => '#'],
+            ['name' => 'All Women Accessories', 'route' => 'catalog.category', 'params' => ['category' => 'women-accessories']],
 
-            ['name' => 'Scarves',             'route' => 'categories.show', 'params' => ['slug' => 'scarves']],
-            ['name' => 'Hats',                'route' => 'categories.show', 'params' => ['slug' => 'hats']],
-            ['name' => 'Gloves',              'route' => 'categories.show', 'params' => ['slug' => 'gloves']],
-            ['name' => 'Hair Accessories',    'route' => 'categories.show', 'params' => ['slug' => 'hair-accessories']],
-            ['name' => 'Home Decor',          'route' => 'categories.show', 'params' => ['slug' => 'home-decor']],
-            ['name' => 'Thermos / Drinkware', 'route' => 'categories.show', 'params' => ['slug' => 'thermos']],
-            ['name' => 'Luggage & Trolleys',  'route' => 'categories.show', 'params' => ['slug' => 'luggage']],
-            ['name' => 'Ski Goggles',         'route' => 'categories.show', 'params' => ['slug' => 'ski-goggles']],
+            ['name' => 'Scarves',             'route' => 'catalog.category', 'params' => ['category' => 'scarves']],
+            ['name' => 'Hats',                'route' => 'catalog.category', 'params' => ['category' => 'hats']],
+            ['name' => 'Gloves',              'route' => 'catalog.category', 'params' => ['category' => 'gloves']],
+            ['name' => 'Hair Accessories',    'route' => 'catalog.category', 'params' => ['category' => 'hair-accessories']],
+            ['name' => 'Home Decor',          'route' => 'catalog.category', 'params' => ['category' => 'home-decor']],
+            ['name' => 'Thermos / Drinkware', 'route' => 'catalog.category', 'params' => ['category' => 'thermos']],
+            ['name' => 'Luggage & Trolleys',  'route' => 'catalog.category', 'params' => ['category' => 'luggage']],
+            ['name' => 'Ski Goggles',         'route' => 'catalog.category', 'params' => ['category' => 'ski-goggles']],
         ],
 
         // ---- Belts ----
         'Belts' => [
-            ['name' => 'All Women Belts', 'href' => '#'],
+            ['name' => 'All Women Belts', 'route' => 'catalog.category', 'params' => ['category' => 'women-belts']],
 
-            ['name' => 'Louis Vuitton Belts', 'route' => 'categories.show', 'params' => ['slug' => 'lv-belts']],
-            ['name' => 'Gucci Belts',         'route' => 'categories.show', 'params' => ['slug' => 'gucci-belts']],
-            ['name' => 'YSL Belts',           'route' => 'categories.show', 'params' => ['slug' => 'ysl-belts']],
-            ['name' => 'Celine Belts',        'route' => 'categories.show', 'params' => ['slug' => 'celine-belts']],
+            ['name' => 'Louis Vuitton Belts', 'route' => 'catalog.category', 'params' => ['category' => 'lv-belts']],
+            ['name' => 'Gucci Belts',         'route' => 'catalog.category', 'params' => ['category' => 'gucci-belts']],
+            ['name' => 'YSL Belts',           'route' => 'catalog.category', 'params' => ['category' => 'ysl-belts']],
+            ['name' => 'Celine Belts',        'route' => 'catalog.category', 'params' => ['category' => 'celine-belts']],
         ],
 
         // ---- Jewelry ----
         'Jewelry' => [
-            ['name' => 'All Women Jewelry', 'href' => '#'],
+            ['name' => 'All Women Jewelry', 'route' => 'catalog.category', 'params' => ['category' => 'women-jewelry']],
 
-            ['name' => 'Chanel Jewelry', 'route' => 'categories.show', 'params' => ['slug' => 'chanel-jewelry']],
-            ['name' => 'Dior Jewelry',   'route' => 'categories.show', 'params' => ['slug' => 'dior-jewelry']],
+            ['name' => 'Chanel Jewelry', 'route' => 'catalog.category', 'params' => ['category' => 'chanel-jewelry']],
+            ['name' => 'Dior Jewelry',   'route' => 'catalog.category', 'params' => ['category' => 'dior-jewelry']],
         ],
 
         // ---- Glasses ----
         'Glasses' => [
-            ['name' => 'All Women Glasses', 'href' => '#'],
+            ['name' => 'All Women Glasses', 'route' => 'catalog.category', 'params' => ['category' => 'women-glasses']],
 
-            ['name' => 'Louis Vuitton Glasses', 'route' => 'categories.show', 'params' => ['slug' => 'lv-glasses']],
-            ['name' => 'Gucci Glasses',         'route' => 'categories.show', 'params' => ['slug' => 'gucci-glasses']],
-            ['name' => 'Prada Glasses',         'route' => 'categories.show', 'params' => ['slug' => 'prada-glasses']],
-            ['name' => 'Celine Glasses',        'route' => 'categories.show', 'params' => ['slug' => 'celine-glasses']],
+            ['name' => 'Louis Vuitton Glasses', 'route' => 'catalog.category', 'params' => ['category' => 'lv-glasses']],
+            ['name' => 'Gucci Glasses',         'route' => 'catalog.category', 'params' => ['category' => 'gucci-glasses']],
+            ['name' => 'Prada Glasses',         'route' => 'catalog.category', 'params' => ['category' => 'prada-glasses']],
+            ['name' => 'Celine Glasses',        'route' => 'catalog.category', 'params' => ['category' => 'celine-glasses']],
         ],
-
         // ---- Watches ----
         'Watches' => [
-            ['name' => 'All Women Watches', 'href' => '#'],
-
-            ['name' => 'Top Quality Watches', 'route' => 'categories.show', 'params' => ['slug' => 'top-quality-watches']],
+            ['name' => 'All Women Watches', 'route' => 'catalog.category', 'params' => ['category' => 'women-watches']],
+            ['name' => 'Top Quality Watches', 'route' => 'catalog.category', 'params' => ['category' => 'top-quality-watches']],
         ],
     ],
 
@@ -108,90 +108,81 @@ return [
 
         // ---- Bags ----
         'Bags' => [
-            ['name' => 'All Men Bags', 'href' => '#'],
-
-            ['name' => 'Gucci Men Bags', 'route' => 'categories.show', 'params' => ['slug' => 'gucci-men-bags']],
+            ['name' => 'All Men Bags', 'route' => 'catalog.category', 'params' => ['category' => 'men-bags']],
+            ['name' => 'Gucci Men Bags', 'route' => 'catalog.category', 'params' => ['category' => 'gucci-men-bags']],
         ],
 
         // ---- Shoes ----
         'Shoes' => [
-            ['name' => 'All Men Shoes', 'href' => '#'],
-
-            ['name' => 'Louis Vuitton Men Shoes',     'route' => 'categories.show', 'params' => ['slug' => 'lv-men-shoes']],
-            ['name' => 'Chanel Men Shoes',            'route' => 'categories.show', 'params' => ['slug' => 'chanel-men-shoes']],
-            ['name' => 'Dior Men Shoes',              'route' => 'categories.show', 'params' => ['slug' => 'dior-men-shoes']],
-            ['name' => 'Gucci Men Shoes',             'route' => 'categories.show', 'params' => ['slug' => 'gucci-men-shoes']],
-            ['name' => 'Celine Men Shoes',            'route' => 'categories.show', 'params' => ['slug' => 'celine-men-shoes']],
-            ['name' => 'Prada Men Shoes',             'route' => 'categories.show', 'params' => ['slug' => 'prada-men-shoes']],
-            ['name' => 'Nike / AJ / Sports Shoes',    'route' => 'categories.show', 'params' => ['slug' => 'nike-aj-sneakers']],
+            ['name' => 'All Men Shoes', 'route' => 'catalog.category', 'params' => ['category' => 'men-shoes']],
+            ['name' => 'Louis Vuitton Men Shoes',  'route' => 'catalog.category', 'params' => ['category' => 'louis-vuitton-men-shoes']],
+            ['name' => 'Chanel Men Shoes',         'route' => 'catalog.category', 'params' => ['category' => 'chanel-men-shoes']],
+            ['name' => 'Dior Men Shoes',           'route' => 'catalog.category', 'params' => ['category' => 'dior-men-shoes']],
+            ['name' => 'Gucci Men Shoes',          'route' => 'catalog.category', 'params' => ['category' => 'gucci-men-shoes']],
+            ['name' => 'Celine Men Shoes',         'route' => 'catalog.category', 'params' => ['category' => 'celine-men-shoes']],
+            ['name' => 'Prada Men Shoes',          'route' => 'catalog.category', 'params' => ['category' => 'prada-men-shoes']],
+            ['name' => 'Nike / AJ / Sports Shoes', 'route' => 'catalog.category', 'params' => ['category' => 'nike-aj-sneakers']],
         ],
 
         // ---- Clothing ----
         'Clothing' => [
-            ['name' => 'All Men Clothing', 'href' => '#'],
-
-            ['name' => 'Louis Vuitton Men Clothing', 'route' => 'categories.show', 'params' => ['slug' => 'lv-men-clothes']],
-            ['name' => 'Chanel Men Clothing',        'route' => 'categories.show', 'params' => ['slug' => 'chanel-men-clothes']],
-            ['name' => 'Dior Men Clothing',          'route' => 'categories.show', 'params' => ['slug' => 'dior-men-clothes']],
-            ['name' => 'Gucci Men Clothing',         'route' => 'categories.show', 'params' => ['slug' => 'gucci-men-clothes']],
-            ['name' => 'Celine Men Clothing',        'route' => 'categories.show', 'params' => ['slug' => 'celine-men-clothes']],
-            ['name' => 'Moncler Men Clothing',       'route' => 'categories.show', 'params' => ['slug' => 'moncler-men-clothes']],
+            ['name' => 'All Men Clothing', 'route' => 'catalog.category', 'params' => ['category' => 'men-clothing']],
+            ['name' => 'Louis Vuitton Men Clothing', 'route' => 'catalog.category', 'params' => ['category' => 'louis-vuitton-men-clothes']],
+            ['name' => 'Chanel Men Clothing',        'route' => 'catalog.category', 'params' => ['category' => 'chanel-men-clothes']],
+            ['name' => 'Dior Men Clothing',          'route' => 'catalog.category', 'params' => ['category' => 'dior-men-clothes']],
+            ['name' => 'Gucci Men Clothing',         'route' => 'catalog.category', 'params' => ['category' => 'gucci-men-clothes']],
+            ['name' => 'Celine Men Clothing',        'route' => 'catalog.category', 'params' => ['category' => 'celine-men-clothes']],
+            ['name' => 'Moncler Men Clothing',       'route' => 'catalog.category', 'params' => ['category' => 'moncler-men-clothes']],
         ],
 
         // ---- Small Leather Goods ----
         'Small Leather Goods' => [
-            ['name' => 'All Men SLG', 'href' => '#'],
-
-            ['name' => 'Wallets',      'route' => 'categories.show', 'params' => ['slug' => 'wallets-men']],
-            ['name' => 'Card Holders', 'route' => 'categories.show', 'params' => ['slug' => 'card-holders-men']],
-            ['name' => 'Phone Cases',  'route' => 'categories.show', 'params' => ['slug' => 'phone-cases-men']],
-            ['name' => 'Key Chains',   'route' => 'categories.show', 'params' => ['slug' => 'key-chains-men']],
+            ['name' => 'All Men SLG', 'route' => 'catalog.category', 'params' => ['category' => 'men-small-leather-goods']],
+            ['name' => 'Wallets',      'route' => 'catalog.category', 'params' => ['category' => 'wallets-men']],
+            ['name' => 'Card Holders', 'route' => 'catalog.category', 'params' => ['category' => 'card-holders-men']],
+            ['name' => 'Phone Cases',  'route' => 'catalog.category', 'params' => ['category' => 'phone-cases-men']],
+            ['name' => 'Key Chains',   'route' => 'catalog.category', 'params' => ['category' => 'key-chains-men']],
         ],
 
         // ---- Accessories ----
         'Accessories' => [
-            ['name' => 'All Men Accessories', 'href' => '#'],
-
-            ['name' => 'Scarves',            'route' => 'categories.show', 'params' => ['slug' => 'scarves-men']],
-            ['name' => 'Hats',               'route' => 'categories.show', 'params' => ['slug' => 'hats-men']],
-            ['name' => 'Gloves',             'route' => 'categories.show', 'params' => ['slug' => 'gloves-men']],
-            ['name' => 'Socks',              'route' => 'categories.show', 'params' => ['slug' => 'socks-men']],
-            ['name' => 'Home Decor',         'route' => 'categories.show', 'params' => ['slug' => 'home-decor-men']],
-            ['name' => 'Luggage & Trolleys', 'route' => 'categories.show', 'params' => ['slug' => 'luggage-men']],
+            ['name' => 'All Men Accessories', 'route' => 'catalog.category', 'params' => ['category' => 'men-accessories']],
+            ['name' => 'Scarves',            'route' => 'catalog.category', 'params' => ['category' => 'scarves-men']],
+            ['name' => 'Hats',               'route' => 'catalog.category', 'params' => ['category' => 'hats-men']],
+            ['name' => 'Gloves',             'route' => 'catalog.category', 'params' => ['category' => 'gloves-men']],
+            ['name' => 'Socks',              'route' => 'catalog.category', 'params' => ['category' => 'socks-men']],
+            ['name' => 'Home Decor',         'route' => 'catalog.category', 'params' => ['category' => 'home-decor-men']],
+            ['name' => 'Luggage & Trolleys', 'route' => 'catalog.category', 'params' => ['category' => 'luggage-men']],
         ],
 
         // ---- Belts ----
         'Belts' => [
-            ['name' => 'All Men Belts', 'href' => '#'],
-
-            ['name' => 'Louis Vuitton Belts', 'route' => 'categories.show', 'params' => ['slug' => 'lv-belts-men']],
-            ['name' => 'Gucci Belts',         'route' => 'categories.show', 'params' => ['slug' => 'gucci-belts-men']],
-            ['name' => 'Celine Belts',        'route' => 'categories.show', 'params' => ['slug' => 'celine-belts-men']],
-            ['name' => 'Prada Belts',         'route' => 'categories.show', 'params' => ['slug' => 'prada-belts-men']],
+            ['name' => 'All Men Belts', 'route' => 'catalog.category', 'params' => ['category' => 'men-belts']],
+            ['name' => 'Louis Vuitton Belts', 'route' => 'catalog.category', 'params' => ['category' => 'louis-vuitton-belts-men']],
+            ['name' => 'Gucci Belts',         'route' => 'catalog.category', 'params' => ['category' => 'gucci-belts-men']],
+            ['name' => 'Celine Belts',        'route' => 'catalog.category', 'params' => ['category' => 'celine-belts-men']],
+            ['name' => 'Prada Belts',         'route' => 'catalog.category', 'params' => ['category' => 'prada-belts-men']],
         ],
 
         // ---- Jewelry ----
         'Jewelry' => [
-            ['name' => 'All Men Jewelry', 'href' => '#'],
-
-            ['name' => 'Louis Vuitton Jewelry', 'route' => 'categories.show', 'params' => ['slug' => 'lv-jewelry-men']],
-            ['name' => 'Gucci Jewelry',         'route' => 'categories.show', 'params' => ['slug' => 'gucci-jewelry-men']],
+            ['name' => 'All Men Jewelry', 'route' => 'catalog.category', 'params' => ['category' => 'men-jewelry']],
+            ['name' => 'Louis Vuitton Jewelry', 'route' => 'catalog.category', 'params' => ['category' => 'lv-jewelry-men']],
+            ['name' => 'Gucci Jewelry',         'route' => 'catalog.category', 'params' => ['category' => 'gucci-jewelry-men']],
         ],
 
         // ---- Glasses ----
         'Glasses' => [
-            ['name' => 'All Men Glasses', 'href' => '#'],
-
-            ['name' => 'Louis Vuitton Glasses', 'route' => 'categories.show', 'params' => ['slug' => 'lv-glasses-men']],
-            ['name' => 'Gucci Glasses',         'route' => 'categories.show', 'params' => ['slug' => 'gucci-glasses-men']],
-            ['name' => 'Celine Glasses',        'route' => 'categories.show', 'params' => ['slug' => 'celine-glasses-men']],
+            ['name' => 'All Men Glasses', 'route' => 'catalog.category', 'params' => ['category' => 'men-glasses']],
+            ['name' => 'Louis Vuitton Glasses', 'route' => 'catalog.category', 'params' => ['category' => 'lv-glasses-men']],
+            ['name' => 'Gucci Glasses',         'route' => 'catalog.category', 'params' => ['category' => 'gucci-glasses-men']],
+            ['name' => 'Celine Glasses',        'route' => 'catalog.category', 'params' => ['category' => 'celine-glasses-men']],
         ],
 
         // ---- Watches ----
         'Watches' => [
-            ['name' => 'All Men Watches', 'href' => '#'],
-
-            ['name' => 'Top Quality Watches', 'route' => 'categories.show', 'params' => ['slug' => 'top-quality-watches-men']],
+            ['name' => 'All Men Watches', 'route' => 'catalog.category', 'params' => ['category' => 'men-watches']],
+            ['name' => 'Top Quality Watches', 'route' => 'catalog.category', 'params' => ['category' => 'top-quality-watches-men']],
         ],
     ],
 ];
