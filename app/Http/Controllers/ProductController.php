@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Services\CatalogCache;
 use App\Services\ThumbnailService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -18,7 +18,11 @@ use Illuminate\Support\Str;
  * - Breadcrumb navigation
  *
  * Products are identified by their category_slug + product_slug combination,
- * which allows for unique URLs like: /categories/louis-vuitton-women-bags/neverfull-mm
+ * which allows for unique URLs like: /catalog/louis-vuitton-women-bags/neverfull-mm
+ *
+ * Caching Strategy:
+ * - Image file listings: 24 hours (reduces filesystem scans)
+ * - Related product IDs: Uses versioned catalog cache for instant invalidation
  *
  * @see \App\Services\ThumbnailService For image optimization
  * @see \App\Http\Controllers\CategoryController For category browsing
@@ -26,7 +30,8 @@ use Illuminate\Support\Str;
 class ProductController extends Controller
 {
     public function __construct(
-        protected ThumbnailService $thumbnailService
+        protected ThumbnailService $thumbnailService,
+        protected CatalogCache $catalogCache
     ) {}
 
     /**
@@ -43,10 +48,6 @@ class ProductController extends Controller
      * - Products have images stored in: storage/imports/{base-folder}/{product-folder}/
      * - Each image gets three versions: thumb (96px), gallery (800px), original
      * - ThumbnailService generates WebP thumbnails on-demand
-     *
-     * Caching Strategy:
-     * - Image file listings: 24 hours (reduces filesystem scans)
-     * - Related products: 60 minutes (balance freshness vs performance)
      *
      * @param string $category The category_slug (e.g., "louis-vuitton-women-bags")
      * @param string $productSlug The product's unique slug within its category
@@ -127,16 +128,8 @@ class ProductController extends Controller
             ];
         }
 
-        // Load related products (same category, excluding current product)
-        $related = Cache::remember(
-            "product.related.{$product->id}",
-            now()->addMinutes(60),
-            fn() => Product::where('category_slug', $product->category_slug)
-                ->where('id', '!=', $product->id)
-                ->latest('id')
-                ->take(12)
-                ->get()
-        );
+        // Load related products using versioned cache (IDs only for lightweight caching)
+        $related = $this->getRelatedProducts($product);
 
         // Build breadcrumb trail: Home > Catalog > Category > Product
         $categoryLabel = Str::headline(str_replace('-', ' ', $product->category_slug));
@@ -154,5 +147,38 @@ class ProductController extends Controller
             'related'     => $related,
             'breadcrumbs' => $breadcrumbs,
         ]);
+    }
+
+    /**
+     * Get related products with versioned caching.
+     *
+     * Caches only IDs to reduce memory, then hydrates.
+     * Uses catalog version for instant invalidation when products change.
+     *
+     * @param Product $product
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    protected function getRelatedProducts(Product $product)
+    {
+        $version = $this->catalogCache->getVersion();
+        $cacheKey = "related:v{$version}:{$product->id}";
+
+        $ids = Cache::remember($cacheKey, $this->catalogCache->getTtl(), function () use ($product) {
+            return Product::where('category_slug', $product->category_slug)
+                ->where('id', '!=', $product->id)
+                ->latest('id')
+                ->take(12)
+                ->pluck('id')
+                ->all();
+        });
+
+        if (empty($ids)) {
+            return collect();
+        }
+
+        // Hydrate from IDs, preserving order
+        return Product::whereIn('id', $ids)
+            ->orderByRaw('FIELD(id, ' . implode(',', $ids) . ')')
+            ->get();
     }
 }

@@ -2,29 +2,67 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
+use App\Services\CatalogCache;
+use App\Services\CategoryResolver;
 use App\Services\ThumbnailService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
-use App\Models\Product;
 
+/**
+ * Handles catalog browsing with hierarchical category support.
+ *
+ * This controller manages product listing pages with:
+ * - Gender filtering (women, men)
+ * - Section filtering (women-bags, men-shoes)
+ * - Leaf category filtering (louis-vuitton-women-bags)
+ * - Infinite scroll via API endpoint
+ *
+ * Caching Strategy:
+ * - Caches product IDs only (not full models) to reduce memory
+ * - Uses versioned cache keys for instant invalidation on product changes
+ * - Deterministic pagination: page number used in forPage(), not paginate()
+ *
+ * @see \App\Services\CategoryResolver For slug resolution logic
+ * @see \App\Services\CatalogCache For cache management
+ */
 class CategoryController extends Controller
 {
+    protected const PER_PAGE = 24;
+
     public function __construct(
-        protected ThumbnailService $thumbnailService
+        protected ThumbnailService $thumbnailService,
+        protected CategoryResolver $categoryResolver,
+        protected CatalogCache $catalogCache
     ) {}
+
+    /**
+     * Display the main catalog page (all products).
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View
+     */
     public function index(Request $request)
     {
-        $page = $request->get('page', 1);
+        $page = max(1, (int) $request->get('page', 1));
 
-        $products = Cache::remember(
-            "catalog.all.page.{$page}",
-            now()->addMinutes(30),
-            fn() => Product::query()
-                ->orderBy('id', 'asc')
-                ->paginate(24)
-        );
+        // Cache product IDs only (lightweight, deterministic)
+        $cached = $this->catalogCache->remember('all', $page, function () use ($page) {
+            $query = Product::query()->orderBy('id', 'asc');
+            $total = $query->count();
+            $ids = (clone $query)->forPage($page, self::PER_PAGE)->pluck('id')->all();
+
+            return [
+                'ids'       => $ids,
+                'total'     => $total,
+                'per_page'  => self::PER_PAGE,
+                'last_page' => (int) ceil($total / self::PER_PAGE),
+            ];
+        });
+
+        // Hydrate products from cached IDs
+        $products = $this->hydrateProducts($cached['ids'], $page, $cached);
 
         return view('catalog.categories', [
             'title'    => 'All Categories',
@@ -32,235 +70,105 @@ class CategoryController extends Controller
         ]);
     }
 
+    /**
+     * Display a category page (filtered by gender, section, or leaf).
+     *
+     * @param string $category URL slug
+     * @param Request $request
+     * @return \Illuminate\View\View
+     */
     public function show(string $category, Request $request)
     {
-        $slug = Str::of($category)->lower()->slug('-')->toString();
-        $page = $request->get('page', 1);
+        $page = max(1, (int) $request->get('page', 1));
 
-        // Cache category config lookup
-        $catalog = Cache::remember('catalog.config', now()->addHours(24), fn() => (array) config('categories', []));
+        // Resolve URL slug to database category_slug values
+        $resolved = $this->categoryResolver->resolve($category);
+        $slugsForQuery = $resolved['slugs'];
+        $active = $resolved['active'];
 
+        // Create deterministic cache key from sorted slugs
+        $slugsHash = $this->categoryResolver->hashSlugs($slugsForQuery);
 
-        $fromHref = fn ($href) => trim(str_replace('/categories/', '', (string) $href), '/');
+        // Cache product IDs only (deterministic pagination)
+        $cached = $this->catalogCache->remember($slugsHash, $page, function () use ($slugsForQuery, $page) {
+            $query = Product::query()
+                ->when(count($slugsForQuery) > 0, fn($q) => $q->whereIn('category_slug', $slugsForQuery))
+                ->orderBy('id', 'asc');
 
-        // Build map:
-        // - leaf slugs: the real category_slug values in your products table
-        // - synthetic slugs: women, men, women-bags, women-shoes, etc (UI groupings)
-        $items = [];
-        foreach (['women', 'men'] as $gender) {
-            if (!isset($catalog[$gender]) || !is_array($catalog[$gender])) continue;
+            $total = $query->count();
+            $ids = (clone $query)->forPage($page, self::PER_PAGE)->pluck('id')->all();
 
-            foreach ($catalog[$gender] as $section => $links) {
-                if (!is_array($links)) continue;
-
-                $sectionSlug = Str::of($section)->lower()->slug('-')->toString();
-
-                // synthetic: women-bags, women-shoes...
-                $items["{$gender}-{$sectionSlug}"] = [
-                    'slug'    => "{$gender}-{$sectionSlug}",
-                    'gender'  => $gender,
-                    'section' => $section,
-                    'name'    => "All " . ucfirst($gender) . " " . $section,
-                    'type'    => 'group',
-                ];
-
-                foreach ($links as $item) {
-                    $rawSlug = $item['params']['category']
-                        ?? (isset($item['href']) ? $fromHref($item['href']) : null);
-                    if (!$rawSlug) continue;
-
-                    $leafSlug = Str::of($rawSlug)->lower()->slug('-')->toString();
-
-                    // leaf: louis-vuitton-women-bags (this should match products.category_slug)
-                    $items[$leafSlug] = [
-                        'slug'    => $leafSlug,
-                        'gender'  => $gender,
-                        'section' => $section,
-                        'name'    => $item['name'] ?? Str::headline($leafSlug),
-                        'type'    => 'leaf',
-                    ];
-                }
-            }
-
-            // synthetic: women / men
-            $items[$gender] = [
-                'slug'    => $gender,
-                'gender'  => $gender,
-                'section' => null,
-                'name'    => "All " . ucfirst($gender),
-                'type'    => 'group',
+            return [
+                'ids'       => $ids,
+                'total'     => $total,
+                'per_page'  => self::PER_PAGE,
+                'last_page' => (int) ceil($total / self::PER_PAGE),
             ];
+        });
+
+        // Hydrate products from cached IDs
+        $products = $this->hydrateProducts($cached['ids'], $page, $cached);
+
+        // Build navigation context
+        $slug = Str::of($category)->lower()->slug('-')->toString();
+        $catalog = $this->categoryResolver->getCatalog();
+        $navGender = $active['gender'] ?? null;
+
+        if (in_array($slug, ['women', 'men'], true)) {
+            $navGender = $slug;
         }
 
-        // Default active
-        $active = [
-            'slug'    => $slug,
-            'gender'  => null,
-            'section' => null,
-            'name'    => Str::headline(str_replace('-', ' ', $slug)),
-            'type'    => 'leaf',
-        ];
-
-        $slugsForQuery = [];
-
-        // If slug matches something we know
-        if (isset($items[$slug])) {
-            $active = $items[$slug];
-
-            // women / men => all LEAF slugs under that gender
-            if (in_array($slug, ['women', 'men'], true)) {
-                foreach ($items as $it) {
-                    if (($it['type'] ?? null) !== 'leaf') continue;
-                    if (($it['gender'] ?? null) !== $slug) continue;
-                    $slugsForQuery[] = $it['slug'];
-                }
-            }
-            // women-bags / men-shoes => all LEAF slugs in that gender+section
-            elseif (($active['type'] ?? null) === 'group' && $active['section']) {
-                foreach ($items as $it) {
-                    if (($it['type'] ?? null) !== 'leaf') continue;
-                    if (($it['gender'] ?? null) !== $active['gender']) continue;
-                    if (($it['section'] ?? null) !== $active['section']) continue;
-                    $slugsForQuery[] = $it['slug'];
-                }
-            }
-            // leaf => just itself
-            else {
-                $slugsForQuery[] = $slug;
-            }
-        }
-        // Unknown slug: treat as leaf
-        else {
-            $slugsForQuery[] = $slug;
-        }
-
-        // normalize
-        $slugsForQuery = array_values(array_unique(array_filter($slugsForQuery)));
-
-        // Create cache key from slugs
-        $slugsHash = md5(implode(',', $slugsForQuery));
-
-        $products = Cache::remember(
-            "catalog.{$slugsHash}.page.{$page}",
-            now()->addMinutes(30),
-            fn() => Product::query()
-                ->when(count($slugsForQuery) > 0, fn ($q) => $q->whereIn('category_slug', $slugsForQuery))
-                ->orderBy('id', 'asc')
-                ->paginate(24)
-        );
-$navGender = $active['gender'] ?? null;
-
-// If we’re on the synthetic "women" or "men" slug, gender is the slug itself
-if (in_array($slug, ['women', 'men'], true)) {
-    $navGender = $slug;
-}
-
-$navCatalog = $navGender && isset($catalog[$navGender]) ? $catalog[$navGender] : $catalog;
+        $navCatalog = $navGender && isset($catalog[$navGender]) ? $catalog[$navGender] : $catalog;
 
         return view('catalog.categories', [
-            'slug'     => $slug,
-            'title'    => $active['name'],
-            'active'   => $active,
-            'catalog'  => $catalog,
+            'slug'       => $slug,
+            'title'      => $active['name'],
+            'active'     => $active,
+            'catalog'    => $catalog,
             'navCatalog' => $navCatalog,
-            'products' => $products,
+            'products'   => $products,
         ]);
     }
 
     /**
-     * API endpoint for infinite scroll - returns product cards HTML
+     * API endpoint for infinite scroll - returns product cards HTML.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function apiProducts(Request $request)
     {
-        $page = $request->get('page', 1);
+        $page = max(1, (int) $request->get('page', 1));
         $category = $request->get('category');
 
-        // Build query based on category filter
+        // Resolve category slugs (reuses cached category map)
         $slugsForQuery = [];
-
         if ($category) {
-            $slug = Str::of($category)->lower()->slug('-')->toString();
-            $catalog = Cache::remember('catalog.config', now()->addHours(24), fn() => (array) config('categories', []));
-
-            $fromHref = fn ($href) => trim(str_replace('/categories/', '', (string) $href), '/');
-
-            // Build the same category map as show()
-            $items = [];
-            foreach (['women', 'men'] as $gender) {
-                if (!isset($catalog[$gender]) || !is_array($catalog[$gender])) continue;
-
-                foreach ($catalog[$gender] as $section => $links) {
-                    if (!is_array($links)) continue;
-
-                    $sectionSlug = Str::of($section)->lower()->slug('-')->toString();
-                    $items["{$gender}-{$sectionSlug}"] = [
-                        'slug' => "{$gender}-{$sectionSlug}",
-                        'gender' => $gender,
-                        'section' => $section,
-                        'type' => 'group',
-                    ];
-
-                    foreach ($links as $item) {
-                        $rawSlug = $item['params']['category']
-                            ?? (isset($item['href']) ? $fromHref($item['href']) : null);
-                        if (!$rawSlug) continue;
-
-                        $leafSlug = Str::of($rawSlug)->lower()->slug('-')->toString();
-                        $items[$leafSlug] = [
-                            'slug' => $leafSlug,
-                            'gender' => $gender,
-                            'section' => $section,
-                            'type' => 'leaf',
-                        ];
-                    }
-                }
-
-                $items[$gender] = [
-                    'slug' => $gender,
-                    'gender' => $gender,
-                    'section' => null,
-                    'type' => 'group',
-                ];
-            }
-
-            // Resolve slugs for query
-            if (isset($items[$slug])) {
-                $active = $items[$slug];
-
-                if (in_array($slug, ['women', 'men'], true)) {
-                    foreach ($items as $it) {
-                        if (($it['type'] ?? null) !== 'leaf') continue;
-                        if (($it['gender'] ?? null) !== $slug) continue;
-                        $slugsForQuery[] = $it['slug'];
-                    }
-                } elseif (($active['type'] ?? null) === 'group' && $active['section']) {
-                    foreach ($items as $it) {
-                        if (($it['type'] ?? null) !== 'leaf') continue;
-                        if (($it['gender'] ?? null) !== $active['gender']) continue;
-                        if (($it['section'] ?? null) !== $active['section']) continue;
-                        $slugsForQuery[] = $it['slug'];
-                    }
-                } else {
-                    $slugsForQuery[] = $slug;
-                }
-            } else {
-                $slugsForQuery[] = $slug;
-            }
-
-            $slugsForQuery = array_values(array_unique(array_filter($slugsForQuery)));
+            $resolved = $this->categoryResolver->resolve($category);
+            $slugsForQuery = $resolved['slugs'];
         }
 
-        // Build cache key
-        $slugsHash = $category ? md5(implode(',', $slugsForQuery)) : 'all';
+        $slugsHash = $this->categoryResolver->hashSlugs($slugsForQuery);
 
-        $products = Cache::remember(
-            "catalog.{$slugsHash}.page.{$page}",
-            now()->addMinutes(30),
-            fn() => Product::query()
-                ->when(count($slugsForQuery) > 0, fn ($q) => $q->whereIn('category_slug', $slugsForQuery))
-                ->orderBy('id', 'asc')
-                ->paginate(24)
-        );
+        // Cache product IDs only (deterministic pagination)
+        $cached = $this->catalogCache->remember($slugsHash, $page, function () use ($slugsForQuery, $page) {
+            $query = Product::query()
+                ->when(count($slugsForQuery) > 0, fn($q) => $q->whereIn('category_slug', $slugsForQuery))
+                ->orderBy('id', 'asc');
+
+            $total = $query->count();
+            $ids = (clone $query)->forPage($page, self::PER_PAGE)->pluck('id')->all();
+
+            return [
+                'ids'       => $ids,
+                'total'     => $total,
+                'per_page'  => self::PER_PAGE,
+                'last_page' => (int) ceil($total / self::PER_PAGE),
+            ];
+        });
+
+        // Hydrate products from cached IDs (preserving order)
+        $products = $this->getProductsByIds($cached['ids']);
 
         // Render product cards HTML
         $html = '';
@@ -269,10 +177,49 @@ $navCatalog = $navGender && isset($catalog[$navGender]) ? $catalog[$navGender] :
         }
 
         return response()->json([
-            'html' => $html,
-            'hasMore' => $products->hasMorePages(),
-            'nextPage' => $products->currentPage() + 1,
-            'total' => $products->total(),
+            'html'     => $html,
+            'hasMore'  => $page < $cached['last_page'],
+            'nextPage' => $page + 1,
+            'total'    => $cached['total'],
         ]);
+    }
+
+    /**
+     * Hydrate products from cached IDs into a LengthAwarePaginator.
+     *
+     * @param array<int> $ids Product IDs in display order
+     * @param int $page Current page number
+     * @param array $cached Cached pagination metadata
+     * @return LengthAwarePaginator
+     */
+    protected function hydrateProducts(array $ids, int $page, array $cached): LengthAwarePaginator
+    {
+        $products = $this->getProductsByIds($ids);
+
+        return new LengthAwarePaginator(
+            $products,
+            $cached['total'],
+            $cached['per_page'],
+            $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+    }
+
+    /**
+     * Load products by IDs, preserving the given order.
+     *
+     * @param array<int> $ids Product IDs
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    protected function getProductsByIds(array $ids)
+    {
+        if (empty($ids)) {
+            return Product::query()->whereRaw('1 = 0')->get();
+        }
+
+        // Use FIELD() to preserve order from cached IDs
+        return Product::whereIn('id', $ids)
+            ->orderByRaw('FIELD(id, ' . implode(',', $ids) . ')')
+            ->get();
     }
 }

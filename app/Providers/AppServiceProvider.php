@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Product;
+use App\Observers\ProductObserver;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use App\Support\Breadcrumbs;
@@ -15,6 +17,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Register model observers for cache invalidation
+        Product::observe(ProductObserver::class);
+
         View::composer('*', function ($view) {
             $data = $view->getData();
 
