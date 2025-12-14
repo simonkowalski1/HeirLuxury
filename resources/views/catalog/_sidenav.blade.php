@@ -1,62 +1,37 @@
 {{-- resources/views/catalog/_sidenav.blade.php --}}
-
 @php
     use Illuminate\Support\Str;
 
-    // Catalog data (same structure used by the mega menu)
-    $catalog = $catalog ?? config('categories');
+    // Catalog data
+    $catalog = $catalog ?? (array) config('categories', []);
 
-    // Try to figure out the current category slug from:
-    //  - route model binding: {category:slug}
-    //  - or second URL segment: /catalog/{slug}
-    $routeCategory = request()->route('category');
-    $activeSlug    = $activeSlug
-        ?? ($routeCategory?->slug ?? request()->segment(2));
+    // Active slug: prefer injected value, else route param, else URL segment
+    $activeSlug = $activeSlug
+        ?? ((string) request()->route('category') ?: request()->segment(2));
 
-    /*
-     |--------------------------------------------------------------
-     | Determine which gender should be open by default
-     |--------------------------------------------------------------
-     | 1) Prefer an exact match in the catalog tree
-     | 2) Fall back to a slug-based guess using -women- / -men-
-     */
-
-    $currentGender = 'women'; // sensible default
+    // Default open gender
+    $currentGender = 'women';
 
     if ($activeSlug) {
-        $detected = null;
-
-        // 1) Try to find the slug inside the catalog structure
-        foreach (['women', 'men'] as $genderKey) {
-            $sections = $catalog[$genderKey] ?? [];
-
-            foreach ($sections as $sectionLabel => $items) {
-                foreach ($items as $item) {
-                    $params = $item['params'] ?? [];
-                    $slug   = $params['category'] ?? $params['slug'] ?? null;
-
-                    if ($slug === $activeSlug) {
-                        $detected = $genderKey;
-                        break 3; // break all three loops
+        // Deterministic for group slugs
+        if (Str::startsWith($activeSlug, 'men-') || $activeSlug === 'men') {
+            $currentGender = 'men';
+        } elseif (Str::startsWith($activeSlug, 'women-') || $activeSlug === 'women') {
+            $currentGender = 'women';
+        } else {
+            // Detect by scanning config items
+            foreach (['women', 'men'] as $genderKey) {
+                $sections = $catalog[$genderKey] ?? [];
+                foreach ($sections as $sectionLabel => $items) {
+                    foreach ($items as $item) {
+                        $params = $item['params'] ?? [];
+                        $slug = $params['category'] ?? ($params['slug'] ?? null);
+                        if ($slug === $activeSlug) {
+                            $currentGender = $genderKey;
+                            break 3;
+                        }
                     }
                 }
-            }
-        }
-
-        if ($detected) {
-            $currentGender = $detected;
-        } else {
-            // 2) Fallback: infer from slug text
-            if (
-                Str::contains($activeSlug, '-women-') ||
-                Str::endsWith($activeSlug, '-women')
-            ) {
-                $currentGender = 'women';
-            } elseif (
-                Str::contains($activeSlug, '-men-') ||
-                Str::endsWith($activeSlug, '-men')
-            ) {
-                $currentGender = 'men';
             }
         }
     }
@@ -65,9 +40,7 @@
 <aside class="catalog-sidenav">
     <div x-data="{ openGender: '{{ $currentGender }}' }" class="catalog-sidenav-inner gold-scroll">
         @foreach (['women' => 'Women', 'men' => 'Men'] as $genderKey => $genderLabel)
-            @php
-                $sections = $catalog[$genderKey] ?? [];
-            @endphp
+            @php $sections = $catalog[$genderKey] ?? []; @endphp
 
             <section class="side-nav-group">
                 {{-- Gender toggle row --}}
@@ -105,26 +78,30 @@
                             <ul class="side-nav-list">
                                 @foreach ($items as $item)
                                     @php
-                                        // Normalise URL building so we stay in sync with the mega menu
-                                        $routeName = $item['route'] ?? null;
-                                        $params    = $item['params'] ?? [];
-                                        $href      = $item['href'] ?? '#';
-                                        $slug      = $params['category'] ?? $params['slug'] ?? null;
+                                        $name   = $item['label'] ?? $item['name'] ?? 'Unnamed';
+                                        $params = $item['params'] ?? [];
+                                        $href   = $item['href'] ?? '#';
 
-                                        if ($routeName) {
-                                            if ($routeName === 'categories.show') {
-                                                // Legacy config: ['slug' => 'louis-vuitton-women-bags']
-                                                if (isset($params['slug'])) {
-                                                    $slug = $params['slug'];
-                                                    $href = route('catalog.category', [
-                                                        'category' => $slug,
-                                                    ]);
-                                                }
-                                            } else {
+                                        // Normalize legacy param key
+if (isset($params['slug']) && !isset($params['category'])) {
+    $params['category'] = $params['slug'];
+    unset($params['slug']);
+}
+
+                                        // Canonical route for category links
+                                        if (!empty($item['route'])) {
+                                            $routeName = $item['route'] === 'categories.show'
+                                                ? 'catalog.category'
+                                                : $item['route'];
+
+                                            try {
                                                 $href = route($routeName, $params);
+                                            } catch (\Throwable $e) {
+                                                // keep fallback $href
                                             }
                                         }
 
+                                        $slug = $params['category'] ?? null;
                                         $isActive = $slug && $slug === $activeSlug;
                                     @endphp
 
@@ -133,7 +110,7 @@
                                             href="{{ $href }}"
                                             class="side-nav-link {{ $isActive ? 'side-nav-link--active' : '' }}"
                                         >
-                                            {{ $item['label'] ?? $item['name'] ?? 'Unnamed' }}
+                                            {{ $name }}
                                         </a>
                                     </li>
                                 @endforeach

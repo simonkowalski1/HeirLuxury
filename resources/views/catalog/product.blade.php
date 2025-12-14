@@ -3,21 +3,6 @@
 @section('title', $product->name)
 
 @section('content')
-    @php
-        use Illuminate\Support\Facades\Storage;
-
-        $images = [];
-
-        if ($product->image_path) {
-            $images[] = [
-                'src' => Storage::url($product->image_path),
-                'alt' => $product->name,
-            ];
-        }
-
-        // Later we can auto-scan the folder for 0001.jpg, 0002.jpg, etc.
-    @endphp
-
     {{-- Breadcrumbs --}}
     @if (!empty($breadcrumbs ?? null))
         <x-breadcrumbs :items="$breadcrumbs" />

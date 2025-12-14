@@ -69,12 +69,12 @@
     [
       'label'  => 'Louis Vuitton Women Bags',
       'route'  => 'catalog.category',
-      'params' => ['categorySlug' => 'louis-vuitton-women-bags'],
+      'params' => ['category' => 'louis-vuitton-women-bags'],
     ],
     [
       'label'  => 'Louis Vuitton Women Shoes',
       'route'  => 'catalog.category',
-      'params' => ['categorySlug' => 'louis-vuitton-women-shoes'],
+      'params' => ['category' => 'louis-vuitton-women-shoes'],
     ],
   ];
 @endphp

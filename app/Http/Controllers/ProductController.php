@@ -9,10 +9,10 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
-    public function show(string $categorySlug, string $productSlug)
+    public function show(string $category, string $productSlug)
     {
         // 1. Find the product that matches BOTH category + slug
-        $product = Product::where('category_slug', $categorySlug)
+        $product = Product::where('category_slug', $category)
             ->where('slug', $productSlug)
             ->firstOrFail();
 
@@ -20,9 +20,9 @@ class ProductController extends Controller
         $baseFolder = match ($product->category_slug) {
             'louis-vuitton-women-bags'  => 'lv-bags-women',
             'louis-vuitton-women-shoes' => 'lv-shoes-women',
-            'lv-women-clothes'          => 'lv-clothes-women',
-            'lv-men-clothes'            => 'lv-clothes-men',
-            'lv-men-shoes'              => 'lv-shoes-men',
+            'louis-vuitton-women-clothes' => 'lv-clothes-women',
+            'louis-vuitton-men-clothes'   => 'lv-clothes-men',
+            'louis-vuitton-men-shoes'   => 'lv-shoes-men',
             default                     => null,
         };
 
@@ -71,7 +71,8 @@ class ProductController extends Controller
             ['label' => 'Catalog', 'href' => route('catalog.grouped')],
             [
                 'label' => $categoryLabel,
-                'href'  => route('categories.show', ['category' => $product->category_slug]),
+                'href' => route('catalog.category', ['category' => $product->category_slug]),
+
             ],
             ['label' => $product->name, 'href' => null],
         ];

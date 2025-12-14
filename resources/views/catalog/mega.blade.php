@@ -1,36 +1,14 @@
 {{-- resources/views/catalog/mega.blade.php --}}
 
 @php
-$womenSections = (array) data_get(config('categories', []), 'women', []);
-  $menSections   = (array) data_get(config('categories', []), 'men', []);
-  $routeName = $item['route'] ?? 'catalog.category';
-  $params    = $item['params'] ?? [];
+    // Build sections from config if they weren't passed in
 
-  // Normalize everything to the canonical category route
-  if ($routeName === 'categories.show') {
-      $routeName = 'catalog.category';
-  }
+    $womenSections = $womenSections
+        ?? collect(config('categories.women') ?? []);
 
-  if ($routeName === 'catalog.category') {
-      // Accept legacy keys and normalize to the required key:
-      // - old config may pass ['slug' => '...']
-      // - or ['category' => '...']
-      // - or derive from href
-      $slug = $params['categorySlug']
-          ?? $params['category']
-          ?? $params['slug']
-          ?? null;
-
-      if (!$slug && !empty($item['href'])) {
-          // supports /categories/xyz OR /catalog/xyz
-          $slug = trim(parse_url($item['href'], PHP_URL_PATH), '/');
-          $slug = preg_replace('~^(categories|catalog)/~', '', $slug);
-      }
-
-      $params = ['categorySlug' => $slug];
-  }
+    $menSections = $menSections
+        ?? collect(config('categories.men') ?? []);
 @endphp
-
 
 
 <div x-data="{ gender: 'women' }" class="mega-shell">
