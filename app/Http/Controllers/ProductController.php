@@ -176,9 +176,10 @@ class ProductController extends Controller
             return collect();
         }
 
-        // Hydrate from IDs, preserving order
-        return Product::whereIn('id', $ids)
-            ->orderByRaw('FIELD(id, ' . implode(',', $ids) . ')')
-            ->get();
+        // Fetch and sort in PHP to be database-agnostic (SQLite lacks FIELD())
+        $products = Product::whereIn('id', $ids)->get();
+        $idOrder = array_flip($ids);
+
+        return $products->sortBy(fn($p) => $idOrder[$p->id] ?? PHP_INT_MAX)->values();
     }
 }

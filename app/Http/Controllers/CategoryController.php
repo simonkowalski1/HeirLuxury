@@ -214,12 +214,14 @@ class CategoryController extends Controller
     protected function getProductsByIds(array $ids)
     {
         if (empty($ids)) {
-            return Product::query()->whereRaw('1 = 0')->get();
+            return collect();
         }
 
-        // Use FIELD() to preserve order from cached IDs
-        return Product::whereIn('id', $ids)
-            ->orderByRaw('FIELD(id, ' . implode(',', $ids) . ')')
-            ->get();
+        // Fetch products and sort in PHP to be database-agnostic
+        // (MySQL has FIELD(), SQLite doesn't)
+        $products = Product::whereIn('id', $ids)->get();
+        $idOrder = array_flip($ids);
+
+        return $products->sortBy(fn($p) => $idOrder[$p->id] ?? PHP_INT_MAX)->values();
     }
 }
