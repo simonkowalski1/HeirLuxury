@@ -1,11 +1,58 @@
 <?php
+
 /**
- * HeirLuxury catalog taxonomy (route-friendly)
+ * HeirLuxury Catalog Taxonomy Configuration
+ *
+ * This file defines the complete category hierarchy for the product catalog.
+ * It's used by the CategoryController to build navigation menus and resolve
+ * category slugs to database queries.
+ *
+ * Structure:
+ * ----------
+ * The taxonomy is organized as: Gender → Section → Categories
+ *
+ * - Gender: Top level ("women", "men")
+ * - Section: Product type grouping ("Bags", "Shoes", "Clothing", etc.)
+ * - Categories: Individual category entries with routing information
+ *
+ * Category Types:
+ * ---------------
+ * 1. "Synthetic" categories (UI groupings only):
+ *    - "women-bags", "men-shoes" - Show ALL products in that section
+ *    - These don't exist in the products table; the controller aggregates leaf categories
+ *
+ * 2. "Leaf" categories (actual product categories):
+ *    - "louis-vuitton-women-bags" - Maps directly to products.category_slug
+ *    - These are what's actually stored in the database
+ *
+ * Entry Format:
+ * -------------
+ * Each category entry is an array with:
+ * - 'name'   => Display name shown in navigation
+ * - 'route'  => Laravel route name (typically 'catalog.category')
+ * - 'params' => Route parameters, including 'category' slug
+ *
+ * Adding New Categories:
+ * ----------------------
+ * 1. Add the entry here under the appropriate gender/section
+ * 2. If it's a new brand, add the folder mapping in ImportLV.php
+ * 3. Run the import command to populate products
+ *
+ * @see \App\Http\Controllers\CategoryController::show() For slug resolution logic
+ * @see \App\Console\Commands\ImportLV For folder-to-category mapping
  */
 
 return [
 
-    // ========================= WOMEN =========================
+    /*
+    |--------------------------------------------------------------------------
+    | Women's Categories
+    |--------------------------------------------------------------------------
+    |
+    | All product categories for women, organized by section (Bags, Shoes, etc.)
+    | The first entry in each section is typically the "All" aggregator.
+    |
+    */
     'women' => [
 
         // ---- Bags ----
@@ -103,7 +150,15 @@ return [
         ],
     ],
 
-    // ========================= MEN =========================
+    /*
+    |--------------------------------------------------------------------------
+    | Men's Categories
+    |--------------------------------------------------------------------------
+    |
+    | All product categories for men, organized by section (Bags, Shoes, etc.)
+    | Follows the same structure as women's categories.
+    |
+    */
     'men' => [
 
         // ---- Bags ----
