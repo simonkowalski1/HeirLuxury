@@ -21,6 +21,10 @@ Route::view('/contact', 'contact')->name('contact');
 Route::get('/catalog', [FrontCategoryController::class, 'index'])
     ->name('catalog.grouped');
 
+// Catalog API for infinite scroll
+Route::get('/api/catalog/products', [FrontCategoryController::class, 'apiProducts'])
+    ->name('api.catalog.products');
+
 // Category page
 Route::get('/catalog/{category}', [FrontCategoryController::class, 'show'])
     ->name('catalog.category');

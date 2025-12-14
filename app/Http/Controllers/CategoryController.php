@@ -2,17 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\ThumbnailService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\Product;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function __construct(
+        protected ThumbnailService $thumbnailService
+    ) {}
+    public function index(Request $request)
     {
-        $products = Product::query()
-            ->orderBy('id', 'asc')
-            ->paginate(24);
+        $page = $request->get('page', 1);
+
+        $products = Cache::remember(
+            "catalog.all.page.{$page}",
+            now()->addMinutes(30),
+            fn() => Product::query()
+                ->orderBy('id', 'asc')
+                ->paginate(24)
+        );
 
         return view('catalog.categories', [
             'title'    => 'All Categories',
@@ -20,10 +32,13 @@ class CategoryController extends Controller
         ]);
     }
 
-    public function show(string $category)
+    public function show(string $category, Request $request)
     {
         $slug = Str::of($category)->lower()->slug('-')->toString();
-        $catalog = (array) config('categories', []);
+        $page = $request->get('page', 1);
+
+        // Cache category config lookup
+        $catalog = Cache::remember('catalog.config', now()->addHours(24), fn() => (array) config('categories', []));
 
 
         $fromHref = fn ($href) => trim(str_replace('/categories/', '', (string) $href), '/');
@@ -122,10 +137,17 @@ class CategoryController extends Controller
         // normalize
         $slugsForQuery = array_values(array_unique(array_filter($slugsForQuery)));
 
-        $products = Product::query()
-            ->when(count($slugsForQuery) > 0, fn ($q) => $q->whereIn('category_slug', $slugsForQuery))
-            ->orderBy('id', 'asc')
-            ->paginate(24);
+        // Create cache key from slugs
+        $slugsHash = md5(implode(',', $slugsForQuery));
+
+        $products = Cache::remember(
+            "catalog.{$slugsHash}.page.{$page}",
+            now()->addMinutes(30),
+            fn() => Product::query()
+                ->when(count($slugsForQuery) > 0, fn ($q) => $q->whereIn('category_slug', $slugsForQuery))
+                ->orderBy('id', 'asc')
+                ->paginate(24)
+        );
 $navGender = $active['gender'] ?? null;
 
 // If we’re on the synthetic "women" or "men" slug, gender is the slug itself
@@ -142,6 +164,115 @@ $navCatalog = $navGender && isset($catalog[$navGender]) ? $catalog[$navGender] :
             'catalog'  => $catalog,
             'navCatalog' => $navCatalog,
             'products' => $products,
+        ]);
+    }
+
+    /**
+     * API endpoint for infinite scroll - returns product cards HTML
+     */
+    public function apiProducts(Request $request)
+    {
+        $page = $request->get('page', 1);
+        $category = $request->get('category');
+
+        // Build query based on category filter
+        $slugsForQuery = [];
+
+        if ($category) {
+            $slug = Str::of($category)->lower()->slug('-')->toString();
+            $catalog = Cache::remember('catalog.config', now()->addHours(24), fn() => (array) config('categories', []));
+
+            $fromHref = fn ($href) => trim(str_replace('/categories/', '', (string) $href), '/');
+
+            // Build the same category map as show()
+            $items = [];
+            foreach (['women', 'men'] as $gender) {
+                if (!isset($catalog[$gender]) || !is_array($catalog[$gender])) continue;
+
+                foreach ($catalog[$gender] as $section => $links) {
+                    if (!is_array($links)) continue;
+
+                    $sectionSlug = Str::of($section)->lower()->slug('-')->toString();
+                    $items["{$gender}-{$sectionSlug}"] = [
+                        'slug' => "{$gender}-{$sectionSlug}",
+                        'gender' => $gender,
+                        'section' => $section,
+                        'type' => 'group',
+                    ];
+
+                    foreach ($links as $item) {
+                        $rawSlug = $item['params']['category']
+                            ?? (isset($item['href']) ? $fromHref($item['href']) : null);
+                        if (!$rawSlug) continue;
+
+                        $leafSlug = Str::of($rawSlug)->lower()->slug('-')->toString();
+                        $items[$leafSlug] = [
+                            'slug' => $leafSlug,
+                            'gender' => $gender,
+                            'section' => $section,
+                            'type' => 'leaf',
+                        ];
+                    }
+                }
+
+                $items[$gender] = [
+                    'slug' => $gender,
+                    'gender' => $gender,
+                    'section' => null,
+                    'type' => 'group',
+                ];
+            }
+
+            // Resolve slugs for query
+            if (isset($items[$slug])) {
+                $active = $items[$slug];
+
+                if (in_array($slug, ['women', 'men'], true)) {
+                    foreach ($items as $it) {
+                        if (($it['type'] ?? null) !== 'leaf') continue;
+                        if (($it['gender'] ?? null) !== $slug) continue;
+                        $slugsForQuery[] = $it['slug'];
+                    }
+                } elseif (($active['type'] ?? null) === 'group' && $active['section']) {
+                    foreach ($items as $it) {
+                        if (($it['type'] ?? null) !== 'leaf') continue;
+                        if (($it['gender'] ?? null) !== $active['gender']) continue;
+                        if (($it['section'] ?? null) !== $active['section']) continue;
+                        $slugsForQuery[] = $it['slug'];
+                    }
+                } else {
+                    $slugsForQuery[] = $slug;
+                }
+            } else {
+                $slugsForQuery[] = $slug;
+            }
+
+            $slugsForQuery = array_values(array_unique(array_filter($slugsForQuery)));
+        }
+
+        // Build cache key
+        $slugsHash = $category ? md5(implode(',', $slugsForQuery)) : 'all';
+
+        $products = Cache::remember(
+            "catalog.{$slugsHash}.page.{$page}",
+            now()->addMinutes(30),
+            fn() => Product::query()
+                ->when(count($slugsForQuery) > 0, fn ($q) => $q->whereIn('category_slug', $slugsForQuery))
+                ->orderBy('id', 'asc')
+                ->paginate(24)
+        );
+
+        // Render product cards HTML
+        $html = '';
+        foreach ($products as $product) {
+            $html .= view('components.product.card', ['product' => $product])->render();
+        }
+
+        return response()->json([
+            'html' => $html,
+            'hasMore' => $products->hasMorePages(),
+            'nextPage' => $products->currentPage() + 1,
+            'total' => $products->total(),
         ]);
     }
 }

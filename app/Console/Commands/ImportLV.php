@@ -2,16 +2,19 @@
 
 namespace App\Console\Commands;
 
+use App\Services\ThumbnailService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use App\Models\Product;
 
 class ImportLV extends Command
 {
-    protected $signature = 'import:lv {--fresh : Delete existing products first}';
+    protected $signature = 'import:lv
+                            {--fresh : Delete existing products first}
+                            {--skip-thumbnails : Skip thumbnail generation}';
     protected $description = 'Import LV product folders into the database';
 
-    public function handle()
+    public function handle(ThumbnailService $thumbnailService)
     {
         $base = storage_path('app/public/imports');
 
@@ -80,6 +83,8 @@ class ImportLV extends Command
                 sort($images); // Ensure first image is 0000.jpg or similar
                 $firstImage = $images[0];
 
+                $imagePath = "imports/$folder/$dir/$firstImage";
+
                 Product::updateOrCreate(
                     [
                         'category_slug' => $categorySlug,
@@ -87,13 +92,21 @@ class ImportLV extends Command
                     ],
                     [
                         'slug'       => Str::slug($dir),
-                        'folder'     => $dir,  // ← THIS WAS MISSING!
+                        'folder'     => $dir,
                         'gender'     => $gender,
                         'section'    => $section,
                         'image'      => $firstImage,
-                        'image_path' => "imports/$folder/$dir/$firstImage",
+                        'image_path' => $imagePath,
                     ]
                 );
+
+                // Generate thumbnails for all images in this product folder
+                if (!$this->option('skip-thumbnails')) {
+                    foreach ($images as $img) {
+                        $imgPath = "imports/$folder/$dir/$img";
+                        $thumbnailService->generateAll($imgPath);
+                    }
+                }
 
                 $this->info("  ✔ Imported $dir");
             }

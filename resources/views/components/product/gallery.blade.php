@@ -22,7 +22,7 @@
             next() { this.idx = (this.idx + 1) % this.images.length; this.heroLoaded = false; },
         }"
     >
-        {{-- Thumbnails --}}
+        {{-- Thumbnails - uses optimized thumb size --}}
         <nav class="overflow-y-auto overflow-x-hidden gold-scroll h-[520px]" aria-label="Thumbnails">
             <ul class="space-y-2">
                 @foreach($images as $i => $img)
@@ -36,10 +36,13 @@
                             @focus="setIndex({{ $i }})"
                         >
                             <img
-                                src="{{ $img['src'] }}"
+                                src="{{ $img['thumb'] ?? $img['src'] }}"
                                 alt="{{ $img['alt'] ?? 'Thumbnail '.($i + 1) }}"
+                                width="96"
+                                height="96"
                                 class="w-full h-full object-cover transition duration-200 group-hover:opacity-80 group-hover:scale-105"
                                 loading="lazy"
+                                decoding="async"
                             >
                         </button>
                     </li>
@@ -47,7 +50,7 @@
             </ul>
         </nav>
 
-        {{-- Hero image --}}
+        {{-- Hero image - uses optimized gallery size --}}
         <div class="relative h-[520px]">
             <button
                 type="button"
@@ -57,9 +60,12 @@
                 <img
                     :src="images[idx]?.src"
                     :alt="images[idx]?.alt || 'Product image'"
+                    width="800"
+                    height="800"
                     class="w-full h-full object-cover transition-opacity duration-300"
                     :class="heroLoaded ? 'opacity-100' : 'opacity-0'"
                     @load="heroLoaded = true"
+                    decoding="async"
                 >
             </button>
 
@@ -98,7 +104,7 @@
             </div>
         </div>
 
-        {{-- Lightbox --}}
+        {{-- Lightbox - uses original full-size image --}}
         <template x-teleport="body">
             <div
                 x-show="lightbox"
@@ -107,7 +113,7 @@
                 @keydown.escape.window="lightbox = false"
                 class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 cursor-zoom-out"
             >
-                <img :src="images[idx]?.src" :alt="images[idx]?.alt || 'Product image'" class="max-w-full max-h-full object-contain" @click.stop>
+                <img :src="images[idx]?.original || images[idx]?.src" :alt="images[idx]?.alt || 'Product image'" class="max-w-full max-h-full object-contain" @click.stop>
             </div>
         </template>
     </div>

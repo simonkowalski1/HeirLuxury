@@ -5,6 +5,7 @@
     use Illuminate\Support\Str;
     use Illuminate\Support\Facades\Storage;
     use Illuminate\Support\Facades\Route;
+    use App\Services\ThumbnailService;
 
     $prod = $product ?? $item ?? $p;
     if (! $prod) {
@@ -34,13 +35,13 @@
 
     // Map category -> base import folder (for when image_path is empty)
     $baseFolder = match ($categorySlug) {
-    'louis-vuitton-women-bags'    => 'lv-bags-women',
-    'louis-vuitton-women-shoes'   => 'lv-shoes-women',
-    'louis-vuitton-women-clothes' => 'lv-clothes-women',
-    'louis-vuitton-men-shoes'     => 'lv-shoes-men',
-    'louis-vuitton-men-clothes'   => 'lv-clothes-men',
-    default                       => null,
-};
+        'louis-vuitton-women-bags'    => 'lv-bags-women',
+        'louis-vuitton-women-shoes'   => 'lv-shoes-women',
+        'louis-vuitton-women-clothes' => 'lv-clothes-women',
+        'louis-vuitton-men-shoes'     => 'lv-shoes-men',
+        'louis-vuitton-men-clothes'   => 'lv-clothes-men',
+        default                       => null,
+    };
 
     $folder    = $val('folder');      // e.g. "LV 0001"
     $imageName = $val('image');      // e.g. "0000.jpg"
@@ -51,14 +52,19 @@
     // 2) If empty, build from baseFolder + folder + image
     if (! $imagePath && $baseFolder && $folder) {
         $filename  = $imageName ?: '0000.jpg';
-        // IMPORTANT: no "public/" prefix – Storage::url() already maps to /storage
         $imagePath = "imports/{$baseFolder}/{$folder}/{$filename}";
     }
 
+    // Use optimized thumbnail service for card images
+    $thumbnailService = app(ThumbnailService::class);
+
     if ($imagePath) {
-        $img = Storage::url($imagePath);   // -> /storage/imports/...
+        // Try to get optimized WebP thumbnail, fallback to original
+        $img = $thumbnailService->getUrl($imagePath, 'card') ?? Storage::url($imagePath);
+        $originalImg = Storage::url($imagePath);
     } else {
         $img = asset('assets/placeholders/product-dark.png');
+        $originalImg = $img;
     }
 
     $alt = $val('alt', $name);
@@ -72,8 +78,11 @@
         <img
             src="{{ $img }}"
             alt="{{ $alt }}"
+            width="400"
+            height="300"
             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
+            decoding="async"
         />
 
         @if ($coming)

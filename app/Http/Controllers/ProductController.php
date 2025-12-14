@@ -3,12 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Services\ThumbnailService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
+    public function __construct(
+        protected ThumbnailService $thumbnailService
+    ) {}
+
     public function show(string $category, string $productSlug)
     {
         // 1. Find the product that matches BOTH category + slug
@@ -30,18 +36,27 @@ class ProductController extends Controller
 
         // 3. Build gallery from STORAGE if we know the folder
         if ($baseFolder && $product->folder) {
-            $disk = Storage::disk('public'); // <-- IMPORTANT
+            $disk = Storage::disk('public');
             $dir  = "imports/{$baseFolder}/{$product->folder}";
 
             if ($disk->exists($dir)) {
-                $files = collect($disk->allFiles($dir))
-                    ->filter(fn ($path) => preg_match('/\.(jpe?g|png|webp)$/i', $path))
-                    ->sort()
-                    ->values();
+                // Cache the file listing for this product
+                $files = Cache::remember(
+                    "product.images.{$product->id}",
+                    now()->addHours(24),
+                    fn() => collect($disk->allFiles($dir))
+                        ->filter(fn ($path) => preg_match('/\.(jpe?g|png|webp)$/i', $path))
+                        ->sort()
+                        ->values()
+                        ->all()
+                );
 
-                $images = $files->map(function (string $path) use ($disk, $product) {
+                // Build images with optimized thumbnails
+                $images = collect($files)->map(function (string $path) use ($disk, $product) {
                     return [
-                        'src' => $disk->url($path),
+                        'src' => $this->thumbnailService->getUrl($path, 'gallery') ?? $disk->url($path),
+                        'thumb' => $this->thumbnailService->getUrl($path, 'thumb') ?? $disk->url($path),
+                        'original' => $disk->url($path),
                         'alt' => $product->name,
                     ];
                 })->all();
@@ -50,18 +65,25 @@ class ProductController extends Controller
 
         // 4. Fallback to the single image_path, if folder-based gallery is empty
         if (empty($images) && $product->image_path) {
+            $disk = Storage::disk('public');
             $images[] = [
-                'src' => Storage::disk('public')->url($product->image_path),
+                'src' => $this->thumbnailService->getUrl($product->image_path, 'gallery') ?? $disk->url($product->image_path),
+                'thumb' => $this->thumbnailService->getUrl($product->image_path, 'thumb') ?? $disk->url($product->image_path),
+                'original' => $disk->url($product->image_path),
                 'alt' => $product->name,
             ];
         }
 
-        // 5. Related products from same category
-        $related = Product::where('category_slug', $product->category_slug)
-            ->where('id', '!=', $product->id)
-            ->latest('id')
-            ->take(12)
-            ->get();
+        // 5. Related products from same category (cached)
+        $related = Cache::remember(
+            "product.related.{$product->id}",
+            now()->addMinutes(60),
+            fn() => Product::where('category_slug', $product->category_slug)
+                ->where('id', '!=', $product->id)
+                ->latest('id')
+                ->take(12)
+                ->get()
+        );
 
         // 6. Breadcrumbs
         $categoryLabel = Str::headline(str_replace('-', ' ', $product->category_slug));
