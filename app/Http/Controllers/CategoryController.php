@@ -208,18 +208,22 @@ class CategoryController extends Controller
     /**
      * Load products by IDs, preserving the given order.
      *
+     * Uses PHP-based sorting for database-agnostic compatibility
+     * (MySQL FIELD() is not supported in SQLite).
+     *
      * @param array<int> $ids Product IDs
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Support\Collection
      */
     protected function getProductsByIds(array $ids)
     {
         if (empty($ids)) {
-            return Product::query()->whereRaw('1 = 0')->get();
+            return collect();
         }
 
-        // Use FIELD() to preserve order from cached IDs
-        return Product::whereIn('id', $ids)
-            ->orderByRaw('FIELD(id, ' . implode(',', $ids) . ')')
-            ->get();
+        // Fetch products and sort in PHP to be database-agnostic
+        $products = Product::whereIn('id', $ids)->get();
+        $idOrder = array_flip($ids);
+
+        return $products->sortBy(fn($p) => $idOrder[$p->id] ?? PHP_INT_MAX)->values();
     }
 }
