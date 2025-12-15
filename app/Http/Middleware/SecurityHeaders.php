@@ -61,6 +61,21 @@ class SecurityHeaders
             $response->headers->set('Content-Security-Policy', $csp);
         }
 
+        // Cache headers for static assets (images, CSS, JS)
+        if ($this->isStaticAsset($request)) {
+            $response->headers->set('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+
         return $response;
+    }
+
+    /**
+     * Check if request is for a static asset.
+     */
+    protected function isStaticAsset(Request $request): bool
+    {
+        $path = $request->path();
+
+        return preg_match('/\.(css|js|jpg|jpeg|png|gif|webp|svg|ico|woff|woff2|ttf|eot)$/i', $path);
     }
 }
