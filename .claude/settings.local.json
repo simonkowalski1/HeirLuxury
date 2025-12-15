@@ -19,7 +19,11 @@
       "Bash(composer validate:*)",
       "Bash(php -l:*)",
       "Bash(git checkout:*)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(git push:*)",
+      "Bash(dir:*)",
+      "Bash(Get-ChildItem \"C:\\Users\\simon\\Dev\\Laravel\\HeirLuxury\\storage\\app\\public\\imports\" -Directory)",
+      "Bash(Select-Object Name)"
     ],
     "deny": [],
     "ask": []

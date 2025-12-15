@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 use App\Models\Product;
 
 /**
- * Import Louis Vuitton product catalogs from folder structure into the database.
+ * Import luxury product catalogs from folder structure into the database.
  *
  * This command scans the storage/app/public/imports directory for product folders
  * and creates/updates Product records in the database. It's designed for bulk
@@ -17,18 +17,17 @@ use App\Models\Product;
  * Expected Folder Structure:
  * ```
  * storage/app/public/imports/
- * ├── lv-bags-women/
- * │   ├── Neverfull MM/
+ * ├── {brand}-{section}-{gender}/
+ * │   ├── Product Name/
  * │   │   ├── 0000.jpg
- * │   │   ├── 0001.jpg
  * │   │   └── ...
- * │   └── Speedy 25/
- * │       └── ...
- * ├── lv-shoes-women/
- * │   └── ...
- * └── lv-clothes-men/
- *     └── ...
  * ```
+ *
+ * Supported folder patterns:
+ * - lv-bags-women, lv-shoes-men, lv-clothes-women, etc.
+ * - chanel-bags-women, chanel-shoes-men, etc.
+ * - dior-bags-women, dior-shoes-men, etc.
+ * - hermes-bags-women, hermes-shoes-men, etc.
  *
  * Usage:
  *   php artisan import:lv              # Import new products, skip existing
@@ -44,16 +43,20 @@ class ImportLV extends Command
                             {--fresh : Delete existing products first}
                             {--skip-thumbnails : Skip thumbnail generation}';
 
-    protected $description = 'Import LV product folders into the database';
+    protected $description = 'Import luxury product folders into the database';
+
+    /**
+     * Brand name mapping from folder prefix to full brand name.
+     */
+    protected array $brandMap = [
+        'lv'     => 'louis-vuitton',
+        'chanel' => 'chanel',
+        'dior'   => 'dior',
+        'hermes' => 'hermes',
+    ];
 
     /**
      * Execute the import process.
-     *
-     * The import process:
-     * 1. Scans the imports directory for category folders (lv-bags-women, etc.)
-     * 2. Maps each folder to a category_slug (louis-vuitton-women-bags, etc.)
-     * 3. For each product subfolder, creates/updates a Product record
-     * 4. Optionally generates thumbnails for all product images
      *
      * @param ThumbnailService $thumbnailService Injected service for thumbnail generation
      * @return int Command::SUCCESS or Command::FAILURE
@@ -73,53 +76,33 @@ class ImportLV extends Command
             $this->warn("Cleared all existing products.");
         }
 
-        /*
-         * Folder-to-category mapping.
-         *
-         * This maps the physical folder names in storage to the category_slug
-         * values used in the database and URLs. The category_slug follows the
-         * pattern: {brand}-{gender}-{section}
-         *
-         * These slugs must match the entries in config/categories.php for
-         * proper navigation integration.
-         */
-        $folderToCategorySlug = [
-            'lv-bags-women'    => 'louis-vuitton-women-bags',
-            'lv-shoes-women'   => 'louis-vuitton-women-shoes',
-            'lv-clothes-women' => 'louis-vuitton-women-clothes',
-            'lv-bags-men'      => 'louis-vuitton-men-bags',
-            'lv-shoes-men'     => 'louis-vuitton-men-shoes',
-            'lv-clothes-men'   => 'louis-vuitton-men-clothes',
-        ];
-
         // Get all category folders (excluding . and ..)
         $folders = array_filter(scandir($base), function ($f) use ($base) {
             return $f !== '.' && $f !== '..' && is_dir("$base/$f");
         });
 
+        $totalImported = 0;
+
         foreach ($folders as $folder) {
-            // Skip folders we don't have a mapping for
-            if (!isset($folderToCategorySlug[$folder])) {
-                $this->warn("Skipping unknown folder: $folder");
+            // Parse folder name: {brand}-{section}-{gender}
+            // e.g., "lv-bags-women", "chanel-shoes-men", "hermes-belts-women"
+            $parsed = $this->parseFolderName($folder);
+
+            if (!$parsed) {
+                $this->warn("Skipping unrecognized folder: $folder");
                 continue;
             }
 
-            $categorySlug = $folderToCategorySlug[$folder];
-
-            /*
-             * Extract gender and section from the category slug.
-             * Example: "louis-vuitton-women-bags" -> gender="women", section="bags"
-             *
-             * These values are stored on the Product model for easier filtering
-             * and are used by the CategoryController for navigation.
-             */
-            preg_match('/louis-vuitton-(women|men)-(.+)/', $categorySlug, $matches);
-            $gender  = $matches[1] ?? 'women';
-            $section = $matches[2] ?? 'bags';
+            $categorySlug = $parsed['category_slug'];
+            $brand = $parsed['brand'];
+            $gender = $parsed['gender'];
+            $section = $parsed['section'];
 
             $path = "$base/$folder";
 
             $this->info("📂 Importing: $folder → $categorySlug");
+
+            $folderCount = 0;
 
             // Process each product subfolder within the category
             foreach (scandir($path) as $dir) {
@@ -160,6 +143,7 @@ class ImportLV extends Command
                     [
                         'slug'       => Str::slug($dir),
                         'folder'     => $dir,
+                        'brand'      => $brand,
                         'gender'     => $gender,
                         'section'    => $section,
                         'image'      => $firstImage,
@@ -175,13 +159,52 @@ class ImportLV extends Command
                     }
                 }
 
-                $this->info("  ✔ Imported $dir");
+                $folderCount++;
+                $totalImported++;
             }
 
+            $this->info("  ✔ Imported $folderCount products");
             $this->line("");
         }
 
-        $this->info("🎉 Import complete!");
+        $this->info("🎉 Import complete! Total products: $totalImported");
         return Command::SUCCESS;
+    }
+
+    /**
+     * Parse folder name into brand, section, gender, and category_slug.
+     *
+     * Supports formats:
+     * - {brand}-{section}-{gender} (e.g., lv-bags-women, chanel-shoes-men)
+     *
+     * @param string $folder
+     * @return array|null
+     */
+    protected function parseFolderName(string $folder): ?array
+    {
+        // Pattern: brand-section-gender
+        // e.g., lv-bags-women, chanel-shoes-men, hermes-belts-women
+        if (!preg_match('/^([a-z]+)-([a-z]+)-(women|men)$/i', $folder, $matches)) {
+            return null;
+        }
+
+        $brandPrefix = strtolower($matches[1]);
+        $section = strtolower($matches[2]);
+        $gender = strtolower($matches[3]);
+
+        // Map brand prefix to full brand name
+        $brand = $this->brandMap[$brandPrefix] ?? $brandPrefix;
+
+        // Build category_slug: {brand}-{gender}-{section}
+        // e.g., louis-vuitton-women-bags, chanel-men-shoes
+        $categorySlug = "{$brand}-{$gender}-{$section}";
+
+        return [
+            'brand'         => $brand,
+            'section'       => $section,
+            'gender'        => $gender,
+            'category_slug' => $categorySlug,
+            'folder'        => $folder,
+        ];
     }
 }
