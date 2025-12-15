@@ -76,6 +76,7 @@ class ProductController extends Controller
             'louis-vuitton-women-bags'    => 'lv-bags-women',
             'louis-vuitton-women-shoes'   => 'lv-shoes-women',
             'louis-vuitton-women-clothes' => 'lv-clothes-women',
+            'louis-vuitton-men-bags'      => 'lv-bags-men',
             'louis-vuitton-men-clothes'   => 'lv-clothes-men',
             'louis-vuitton-men-shoes'     => 'lv-shoes-men',
             default                       => null,

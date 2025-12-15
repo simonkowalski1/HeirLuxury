@@ -170,10 +170,12 @@ class CategoryController extends Controller
         // Hydrate products from cached IDs (preserving order)
         $products = $this->getProductsByIds($cached['ids']);
 
-        // Render product cards HTML
+        // Render product cards HTML (wrapped in grid cell div to match initial render)
         $html = '';
         foreach ($products as $product) {
+            $html .= '<div class="h-full">';
             $html .= view('components.product.card', ['product' => $product])->render();
+            $html .= '</div>';
         }
 
         return response()->json([
