@@ -62,24 +62,17 @@ class ProductController extends Controller
             ->firstOrFail();
 
         /*
-         * Map category_slug to the storage folder structure.
+         * Dynamically resolve the storage folder from category_slug.
          *
-         * The import process (ImportLV command) stores images in folders like:
-         * - lv-bags-women/   -> louis-vuitton-women-bags category
-         * - lv-shoes-women/  -> louis-vuitton-women-shoes category
-         * - etc.
+         * Category slug format: {brand}-{gender}-{section}
+         * Storage folder format: {brand-prefix}-{section}-{gender}
          *
-         * This mapping allows the controller to locate the correct image directory
-         * for each product category.
+         * Examples:
+         * - louis-vuitton-women-bags -> lv-bags-women
+         * - chanel-men-shoes -> chanel-shoes-men
+         * - hermes-women-belts -> hermes-belts-women
          */
-        $baseFolder = match ($product->category_slug) {
-            'louis-vuitton-women-bags'    => 'lv-bags-women',
-            'louis-vuitton-women-shoes'   => 'lv-shoes-women',
-            'louis-vuitton-women-clothes' => 'lv-clothes-women',
-            'louis-vuitton-men-clothes'   => 'lv-clothes-men',
-            'louis-vuitton-men-shoes'     => 'lv-shoes-men',
-            default                       => null,
-        };
+        $baseFolder = $this->resolveStorageFolder($product->category_slug);
 
         $images = [];
 
@@ -176,10 +169,46 @@ class ProductController extends Controller
             return collect();
         }
 
-        // Fetch and sort in PHP to be database-agnostic (SQLite lacks FIELD())
+        // Hydrate from IDs, preserving order (PHP sort for SQLite compatibility)
         $products = Product::whereIn('id', $ids)->get();
         $idOrder = array_flip($ids);
 
         return $products->sortBy(fn($p) => $idOrder[$p->id] ?? PHP_INT_MAX)->values();
+    }
+
+    /**
+     * Resolve storage folder path from category_slug.
+     *
+     * Converts category_slug format ({brand}-{gender}-{section})
+     * to storage folder format ({brand-prefix}-{section}-{gender}).
+     *
+     * @param string $categorySlug e.g., "louis-vuitton-women-bags"
+     * @return string|null e.g., "lv-bags-women"
+     */
+    protected function resolveStorageFolder(string $categorySlug): ?string
+    {
+        // Brand prefix mapping
+        $brandPrefixes = [
+            'louis-vuitton' => 'lv',
+            'chanel'        => 'chanel',
+            'dior'          => 'dior',
+            'hermes'        => 'hermes',
+        ];
+
+        // Parse: {brand}-{gender}-{section}
+        // Examples: louis-vuitton-women-bags, chanel-men-shoes
+        foreach ($brandPrefixes as $brand => $prefix) {
+            if (str_starts_with($categorySlug, "{$brand}-")) {
+                $rest = substr($categorySlug, strlen("{$brand}-"));
+                // rest = "women-bags" or "men-shoes"
+                if (preg_match('/^(women|men)-(.+)$/', $rest, $matches)) {
+                    $gender = $matches[1];
+                    $section = $matches[2];
+                    return "{$prefix}-{$section}-{$gender}";
+                }
+            }
+        }
+
+        return null;
     }
 }

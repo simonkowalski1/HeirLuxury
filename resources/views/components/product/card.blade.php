@@ -33,27 +33,8 @@
 
     // === Thumbnail image resolution ===
 
-    // Map category -> base import folder (for when image_path is empty)
-    $baseFolder = match ($categorySlug) {
-        'louis-vuitton-women-bags'    => 'lv-bags-women',
-        'louis-vuitton-women-shoes'   => 'lv-shoes-women',
-        'louis-vuitton-women-clothes' => 'lv-clothes-women',
-        'louis-vuitton-men-shoes'     => 'lv-shoes-men',
-        'louis-vuitton-men-clothes'   => 'lv-clothes-men',
-        default                       => null,
-    };
-
-    $folder    = $val('folder');      // e.g. "LV 0001"
-    $imageName = $val('image');      // e.g. "0000.jpg"
-
-    // 1) Prefer stored image_path (already like "imports/…")
+    // Use stored image_path directly (set by import command)
     $imagePath = $val('image_path');
-
-    // 2) If empty, build from baseFolder + folder + image
-    if (! $imagePath && $baseFolder && $folder) {
-        $filename  = $imageName ?: '0000.jpg';
-        $imagePath = "imports/{$baseFolder}/{$folder}/{$filename}";
-    }
 
     // Use optimized thumbnail service for card images
     $thumbnailService = app(ThumbnailService::class);

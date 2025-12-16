@@ -51,9 +51,6 @@ class Product extends Model
 
     /**
      * Mass assignable attributes.
-     *
-     * Note: 'image_path' is intentionally excluded from fillable as it's
-     * computed from other fields during import.
      */
     protected $fillable = [
         'name',
@@ -64,6 +61,7 @@ class Product extends Model
         'section',
         'folder',
         'image',
+        'image_path',
     ];
 
     /**

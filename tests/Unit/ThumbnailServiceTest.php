@@ -26,6 +26,8 @@ class ThumbnailServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        // Use array driver for tests to avoid database dependency
+        config(['cache.default' => 'array']);
         $this->service = new ThumbnailService();
     }
 

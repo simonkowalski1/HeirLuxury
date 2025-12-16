@@ -12,15 +12,16 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * Mass assignable attributes.
      *
-     * @var list<string>
+     * SECURITY: 'is_admin' is intentionally NOT fillable to prevent
+     * privilege escalation via mass assignment attacks.
+     * Use $user->is_admin = true explicitly when needed.
      */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'is_admin',   // <-- added
     ];
 
     /**
