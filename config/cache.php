@@ -90,6 +90,21 @@ return [
             'driver' => 'octane',
         ],
 
+        /*
+        |--------------------------------------------------------------------------
+        | APCu Cache Store (Recommended for single-server setups)
+        |--------------------------------------------------------------------------
+        |
+        | APCu provides ultra-fast in-memory caching (~0.1ms read/write).
+        | Perfect for XAMPP/single-server production. Requires php_apcu extension.
+        |
+        | To enable: set CACHE_STORE=apc in .env
+        |
+        */
+        'apc' => [
+            'driver' => 'apc',
+        ],
+
     ],
 
     /*
