@@ -24,23 +24,73 @@
     // === Correct href for product page ===
     if ($categorySlug && $slug && Route::has('product.show')) {
         $href = route('product.show', [
-            'category' => $categorySlug,
-            'productSlug'  => $slug,
+            'category'    => $categorySlug,
+            'productSlug' => $slug,
         ]);
     } else {
         $href = '#';
     }
 
     // === Thumbnail image resolution ===
+    // Map category_slug -> base import folder
+    $baseFolder = match ($categorySlug) {
+        // Louis Vuitton
+        'louis-vuitton-women-bags'    => 'lv-bags-women',
+        'louis-vuitton-women-shoes'   => 'lv-shoes-women',
+        'louis-vuitton-women-clothes' => 'lv-clothes-women',
+        'louis-vuitton-men-bags'      => 'lv-bags-men',
+        'louis-vuitton-men-shoes'     => 'lv-shoes-men',
+        'louis-vuitton-men-clothes'   => 'lv-clothes-men',
+        'louis-vuitton-women-belts'   => 'lv-belts-women',
+        'louis-vuitton-women-glasses' => 'lv-glasses-women',
+        'louis-vuitton-women-jewelry' => 'lv-jewelry-women',
+        
+        // Chanel
+        'chanel-women-bags'           => 'chanel-bags-women',
+        'chanel-women-shoes'          => 'chanel-shoes-women',
+        'chanel-women-clothes'        => 'chanel-clothes-women',
+        'chanel-men-shoes'            => 'chanel-shoes-men',
+        'chanel-men-clothes'          => 'chanel-clothes-men',
+        'chanel-women-belts'          => 'chanel-belts-women',
+        'chanel-women-glasses'        => 'chanel-glasses-women',
+        'chanel-women-jewelry'        => 'chanel-jewelry-women',
+        
+        // Dior
+        'dior-women-bags'             => 'dior-bags-women',
+        'dior-women-shoes'            => 'dior-shoes-women',
+        'dior-women-clothes'          => 'dior-clothes-women',
+        'dior-men-shoes'              => 'dior-shoes-men',
+        'dior-men-clothes'            => 'dior-clothes-men',
+        
+        // Hermès
+        'hermes-women-bags'           => 'hermes-bags-women',
+        'hermes-women-shoes'          => 'hermes-shoes-women',
+        'hermes-women-clothes'        => 'hermes-clothes-women',
+        'hermes-men-shoes'            => 'hermes-shoes-men',
+        'hermes-men-clothes'          => 'hermes-clothes-men',
+        'hermes-women-belts'          => 'hermes-belts-women',
+        'hermes-women-glasses'        => 'hermes-glasses-women',
+        'hermes-women-jewelry'        => 'hermes-jewelry-women',
+        
+        default => null,
+    };
 
-    // Use stored image_path directly (set by import command)
+    $folder    = $val('folder');
+    $imageName = $val('image');
+
+    // 1) Prefer stored image_path
     $imagePath = $val('image_path');
+
+    // 2) If empty, build from baseFolder + folder + image
+    if (! $imagePath && $baseFolder && $folder) {
+        $filename  = $imageName ?: '0000.jpg';
+        $imagePath = "imports/{$baseFolder}/{$folder}/{$filename}";
+    }
 
     // Use optimized thumbnail service for card images
     $thumbnailService = app(ThumbnailService::class);
 
     if ($imagePath) {
-        // Try to get optimized WebP thumbnail, fallback to original
         $img = $thumbnailService->getUrl($imagePath, 'card') ?? Storage::url($imagePath);
         $originalImg = Storage::url($imagePath);
     } else {

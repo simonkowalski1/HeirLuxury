@@ -8,7 +8,6 @@ use App\Services\ThumbnailService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-
 /**
  * Handles individual product detail pages.
  *
@@ -33,8 +32,7 @@ class ProductController extends Controller
         protected ThumbnailService $thumbnailService,
         protected CatalogCache $catalogCache
     ) {}
-
-    /**
+        /**
      * Display a single product's detail page.
      *
      * This method handles the product detail view, including:
@@ -56,7 +54,7 @@ class ProductController extends Controller
      */
     public function show(string $category, string $productSlug)
     {
-        // Find product by both category and slug to ensure unique URL resolution
+         // Find product by both category and slug to ensure unique URL resolution
         $product = Product::where('category_slug', $category)
             ->where('slug', $productSlug)
             ->firstOrFail();
@@ -92,8 +90,7 @@ class ProductController extends Controller
                         ->values()
                         ->all()
                 );
-
-                /*
+/*
                  * Build image array with three sizes for each image:
                  * - src: Gallery size (800x800) for main display
                  * - thumb: Thumbnail (96x96) for gallery navigation strip
@@ -109,8 +106,7 @@ class ProductController extends Controller
                 })->all();
             }
         }
-
-        // Fallback: use the single image_path if no folder-based gallery exists
+  // Fallback: use the single image_path if no folder-based gallery exists
         if (empty($images) && $product->image_path) {
             $disk = Storage::disk('public');
             $images[] = [
@@ -120,11 +116,9 @@ class ProductController extends Controller
                 'alt'      => $product->name,
             ];
         }
-
-        // Load related products using versioned cache (IDs only for lightweight caching)
+// Load related products using versioned cache (IDs only for lightweight caching)
         $related = $this->getRelatedProducts($product);
-
-        // Build breadcrumb trail: Home > Catalog > Category > Product
+// Build breadcrumb trail: Home > Catalog > Category > Product
         $categoryLabel = Str::headline(str_replace('-', ' ', $product->category_slug));
 
         $breadcrumbs = [
@@ -141,8 +135,7 @@ class ProductController extends Controller
             'breadcrumbs' => $breadcrumbs,
         ]);
     }
-
-    /**
+/**
      * Get related products with versioned caching.
      *
      * Caches only IDs to reduce memory, then hydrates.
@@ -168,8 +161,7 @@ class ProductController extends Controller
         if (empty($ids)) {
             return collect();
         }
-
-        // Hydrate from IDs, preserving order (PHP sort for SQLite compatibility)
+// Fetch and sort in PHP to be database-agnostic (SQLite lacks FIELD())
         $products = Product::whereIn('id', $ids)->get();
         $idOrder = array_flip($ids);
 
