@@ -16,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
 
         // Trust only application host (prevents host injection)
-        $middleware->trustHosts(at: \App\Http\Middleware\TrustHosts::class);
+        $middleware->trustHosts(fn () => [parse_url(config('app.url'), PHP_URL_HOST)]);
 
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
