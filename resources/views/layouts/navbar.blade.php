@@ -35,7 +35,7 @@
 
             <button
                 type="button"
-                onclick="window.dispatchEvent(new CustomEvent('open-inquiry-modal'))"
+                onclick="window.dispatchEvent(new Event('open-contact-modal'))"
                 class="btn-gold px-4 py-1.5 text-xs"
             >
                 Contact
@@ -46,7 +46,7 @@
         <div class="flex items-center gap-2 lg:hidden">
             <button
                 type="button"
-                onclick="window.dispatchEvent(new CustomEvent('open-inquiry-modal'))"
+                onclick="window.dispatchEvent(new Event('open-contact-modal'))"
                 class="btn-gold text-[11px] px-3 py-1.5"
             >
                 Contact

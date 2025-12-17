@@ -22,7 +22,7 @@
     </main>
 
     {{-- contact modal --}}
-    <x-inquiry-modal />
+    @include('contact.modal')
 
 </body>
 </html>
