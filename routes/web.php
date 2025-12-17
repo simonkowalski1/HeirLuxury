@@ -20,6 +20,7 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\CategoryController as FrontCategoryController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ProductController as FrontProductController;
 use App\Http\Controllers\ProfileController;
 
@@ -41,6 +42,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::view('/contact', 'contact')->name('contact');
+Route::post('/inquiry', [ContactController::class, 'submit'])->name('inquiry.submit');
 
 /*
 |--------------------------------------------------------------------------
@@ -137,6 +139,7 @@ Route::middleware(['auth', 'admin'])
     ->name('admin.')
     ->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::delete('products/bulk', [AdminProductController::class, 'bulkDestroy'])->name('products.bulk-destroy');
         Route::resource('products', AdminProductController::class);
         Route::resource('categories', AdminCategoryController::class);
     });

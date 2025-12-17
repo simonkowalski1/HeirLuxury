@@ -28,17 +28,46 @@ use Illuminate\Support\Str;
 class ProductController extends Controller
 {
     /**
-     * Display paginated list of all products.
+     * Display paginated list of all products with search and filter.
      *
+     * @param Request $request
      * @return \Illuminate\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with('category')
-            ->orderBy('name')
-            ->paginate(20);
+        $query = Product::with('category');
 
-        return view('admin.products.index', compact('products'));
+        // Search by name or slug
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('slug', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by brand
+        if ($brand = $request->get('brand')) {
+            $query->where('brand', $brand);
+        }
+
+        // Filter by gender
+        if ($gender = $request->get('gender')) {
+            $query->where('gender', $gender);
+        }
+
+        $products = $query->orderBy('name')->paginate(20)->withQueryString();
+
+        // Get unique brands and genders for filter dropdowns
+        $brands = Product::whereNotNull('brand')
+            ->distinct()
+            ->orderBy('brand')
+            ->pluck('brand');
+
+        $genders = Product::whereNotNull('gender')
+            ->distinct()
+            ->pluck('gender');
+
+        return view('admin.products.index', compact('products', 'brands', 'genders'));
     }
 
     /**
@@ -166,5 +195,34 @@ class ProductController extends Controller
 
         return redirect()->route('admin.products.index')
             ->with('status', 'Product deleted.');
+    }
+
+    /**
+     * Delete multiple products at once.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            return redirect()->route('admin.products.index')
+                ->with('error', 'No products selected.');
+        }
+
+        $products = Product::whereIn('id', $ids)->get();
+
+        foreach ($products as $product) {
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+            }
+            $product->delete();
+        }
+
+        $count = count($ids);
+        return redirect()->route('admin.products.index')
+            ->with('status', "{$count} product(s) deleted.");
     }
 }

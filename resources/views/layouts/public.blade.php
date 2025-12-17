@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'HeirLuxury')</title>
 
     {{-- Tailwind + app.js via Vite (Breeze style) --}}
@@ -21,7 +22,7 @@
     </main>
 
     {{-- contact modal --}}
-    @includeIf('contact.modal')
+    <x-inquiry-modal />
 
 </body>
 </html>
