@@ -1,6 +1,6 @@
 # HeirLuxury
 
-A luxury product e-commerce catalog built with Laravel 12, featuring multi-brand support, optimized image handling, and hierarchical category navigation.
+A luxury catalog built with Laravel 12, featuring multi-brand support, optimized image handling, and hierarchical category navigation.
 
 ## Features
 
@@ -125,7 +125,7 @@ php artisan import:lv --skip-thumbnails
 
 ### Generating Thumbnails
 
-Thumbnails are generated on-demand, but you can batch generate:
+Thumbnails are generated on-demand:
 
 ```bash
 # Generate all thumbnails
@@ -177,7 +177,7 @@ php artisan route:cache
 php artisan view:cache
 ```
 
-### Option 2: Pre-built Assets (Recommended)
+### Option 2: Pre-built Assets 
 
 Assets are pre-built and committed to the repository. No Node.js required on server:
 
