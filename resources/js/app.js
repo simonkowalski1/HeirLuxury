@@ -74,5 +74,24 @@ window.inquiryModal = function(config) {
     };
 };
 
+// Product carousel component for home page
+window.productCarousel = function(totalItems) {
+    return {
+        currentIndex: 0,
+        totalItems: totalItems,
+        maxIndex: Math.max(0, totalItems - 3), // Show 3 at a time
+        prev() {
+            this.currentIndex = this.currentIndex > 0
+                ? this.currentIndex - 1
+                : this.maxIndex;
+        },
+        next() {
+            this.currentIndex = this.currentIndex < this.maxIndex
+                ? this.currentIndex + 1
+                : 0;
+        }
+    };
+};
+
 window.Alpine = Alpine;
 Alpine.start();

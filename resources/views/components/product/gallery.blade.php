@@ -108,12 +108,93 @@
         <template x-teleport="body">
             <div
                 x-show="lightbox"
-                x-transition.opacity
+                x-cloak
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
                 @click="lightbox = false"
                 @keydown.escape.window="lightbox = false"
-                class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 cursor-zoom-out"
+                @keydown.left.window="if(lightbox) prev()"
+                @keydown.right.window="if(lightbox) next()"
+                class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 cursor-zoom-out"
+                x-data="{ lightboxLoaded: false }"
+                x-init="$watch('lightbox', value => { if(value) lightboxLoaded = false })"
             >
-                <img :src="images[idx]?.original || images[idx]?.src" :alt="images[idx]?.alt || 'Product image'" class="max-w-full max-h-full object-contain" @click.stop>
+                {{-- Loading spinner --}}
+                <div
+                    x-show="!lightboxLoaded"
+                    class="absolute inset-0 flex items-center justify-center"
+                >
+                    <svg class="animate-spin h-10 w-10 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+
+                {{-- Lightbox image --}}
+                <img
+                    x-show="lightboxLoaded"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    :src="images[idx]?.original || images[idx]?.src"
+                    :alt="images[idx]?.alt || 'Product image'"
+                    class="max-w-full max-h-full object-contain"
+                    @load="lightboxLoaded = true"
+                    @click.stop
+                >
+
+                {{-- Close button --}}
+                <button
+                    type="button"
+                    @click="lightbox = false"
+                    class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 border border-white/20
+                           text-white flex items-center justify-center hover:bg-amber-400 hover:text-black
+                           hover:border-amber-400 transition"
+                    aria-label="Close lightbox"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                {{-- Navigation arrows in lightbox --}}
+                <template x-if="images.length > 1">
+                    <div>
+                        <button
+                            type="button"
+                            @click.stop="prev(); lightboxLoaded = false"
+                            class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/60
+                                   border border-white/20 text-white flex items-center justify-center
+                                   hover:bg-amber-400 hover:text-black hover:border-amber-400 transition"
+                            aria-label="Previous image"
+                        >
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <button
+                            type="button"
+                            @click.stop="next(); lightboxLoaded = false"
+                            class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/60
+                                   border border-white/20 text-white flex items-center justify-center
+                                   hover:bg-amber-400 hover:text-black hover:border-amber-400 transition"
+                            aria-label="Next image"
+                        >
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </template>
+
+                {{-- Image counter --}}
+                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white text-sm px-4 py-2 rounded-full border border-white/10">
+                    <span x-text="idx + 1"></span> / <span x-text="images.length"></span>
+                </div>
             </div>
         </template>
     </div>

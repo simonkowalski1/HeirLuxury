@@ -29,16 +29,40 @@
 </button>
 
 
-        {{-- RIGHT: SEARCH + CONTACT (DESKTOP) --}}
+        {{-- RIGHT: LANGUAGE SWITCHER + CONTACT (DESKTOP) --}}
         <div class="hidden lg:flex items-center gap-4">
-            
+            {{-- Language Switcher --}}
+            <div class="flex items-center gap-1">
+                @php
+                    $currentLocale = app()->getLocale();
+                    $currentPath = request()->path();
+                    // Remove current locale prefix to get the path
+                    $pathWithoutLocale = preg_replace('#^(en|pl)/?#', '', $currentPath);
+                @endphp
+
+                <a href="/en/{{ $pathWithoutLocale }}"
+                   class="lang-switch {{ $currentLocale === 'en' ? 'active' : '' }}"
+                   aria-label="Switch to English">
+                    <span class="lang-label">EN</span>
+                    <span class="lang-label lang-label-hover">EN</span>
+                </a>
+
+                <span class="text-white/30 text-xs">/</span>
+
+                <a href="/pl/{{ $pathWithoutLocale }}"
+                   class="lang-switch {{ $currentLocale === 'pl' ? 'active' : '' }}"
+                   aria-label="Switch to Polish">
+                    <span class="lang-label">PL</span>
+                    <span class="lang-label lang-label-hover">PL</span>
+                </a>
+            </div>
 
             <button
                 type="button"
                 onclick="window.dispatchEvent(new Event('open-contact-modal'))"
                 class="btn-gold px-4 py-1.5 text-xs"
             >
-                Contact
+                {{ __('messages.contact') }}
             </button>
         </div>
 
@@ -109,7 +133,28 @@
         aria-label="Catalog navigation"
     >
         <header class="flex h-14 items-center justify-between border-b border-white/10 px-4">
-            <span class="text-xs font-semibold tracking-[0.32em] uppercase text-slate-200">Catalog</span>
+            <div class="flex items-center gap-4">
+                <span class="text-xs font-semibold tracking-[0.32em] uppercase text-slate-200">{{ __('messages.catalog') }}</span>
+
+                {{-- Mobile Language Switcher --}}
+                <div class="flex items-center gap-1">
+                    @php
+                        $currentLocale = app()->getLocale();
+                        $currentPath = request()->path();
+                        $pathWithoutLocale = preg_replace('#^(en|pl)/?#', '', $currentPath);
+                    @endphp
+
+                    <a href="/en/{{ $pathWithoutLocale }}"
+                       class="text-xs font-medium {{ $currentLocale === 'en' ? 'text-yellow-400' : 'text-white/50 hover:text-white' }}">
+                        EN
+                    </a>
+                    <span class="text-white/30 text-xs">/</span>
+                    <a href="/pl/{{ $pathWithoutLocale }}"
+                       class="text-xs font-medium {{ $currentLocale === 'pl' ? 'text-yellow-400' : 'text-white/50 hover:text-white' }}">
+                        PL
+                    </a>
+                </div>
+            </div>
 
             <button
                 type="button"

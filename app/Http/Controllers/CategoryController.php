@@ -77,7 +77,7 @@ class CategoryController extends Controller
      * @param Request $request
      * @return \Illuminate\View\View
      */
-    public function show(string $category, Request $request)
+    public function show(string $locale, string $category, Request $request)
     {
         $page = max(1, (int) $request->get('page', 1));
 
