@@ -94,6 +94,9 @@ if (isset($params['slug']) && !isset($params['category'])) {
                                                 ? 'catalog.category'
                                                 : $item['route'];
 
+                                            // Add locale parameter
+                                            $params['locale'] = app()->getLocale();
+
                                             try {
                                                 $href = route($routeName, $params);
                                             } catch (\Throwable $e) {

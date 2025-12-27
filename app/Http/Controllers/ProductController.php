@@ -81,14 +81,17 @@ class ProductController extends Controller
 
             if ($disk->exists($dir)) {
                 // Cache file listing to avoid repeated filesystem scans
+                // Sort by file size descending so largest (best quality) image is first
                 $files = Cache::remember(
                     "product.images.{$product->id}",
                     now()->addHours(24),
-                    fn() => collect($disk->allFiles($dir))
-                        ->filter(fn ($path) => preg_match('/\.(jpe?g|png|webp)$/i', $path))
-                        ->sort()
-                        ->values()
-                        ->all()
+                    function () use ($disk, $dir) {
+                        return collect($disk->allFiles($dir))
+                            ->filter(fn ($path) => preg_match('/\.(jpe?g|png|webp)$/i', $path))
+                            ->sortByDesc(fn ($path) => $disk->size($path))
+                            ->values()
+                            ->all();
+                    }
                 );
 /*
                  * Build image array with three sizes for each image:

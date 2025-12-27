@@ -106,7 +106,10 @@ class ImportBrands extends Command
                     continue;
                 }
 
-                sort($images);
+                // Sort by file size descending to select largest (best quality) image as thumbnail
+                usort($images, function ($a, $b) use ($productPath) {
+                    return filesize("$productPath/$b") <=> filesize("$productPath/$a");
+                });
                 $firstImage = $images[0];
                 $imagePath = "imports/$folder/$productFolder/$firstImage";
 

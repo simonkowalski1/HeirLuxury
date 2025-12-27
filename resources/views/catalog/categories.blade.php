@@ -5,9 +5,10 @@
 
 @section('content')
 @php
+  $locale = app()->getLocale();
   $breadcrumbs = [
-    ['label' => 'Home', 'href' => route('home')],
-    ['label' => 'Catalog', 'href' => route('catalog.grouped')],
+    ['label' => 'Home', 'href' => route('home', ['locale' => $locale])],
+    ['label' => 'Catalog', 'href' => route('catalog.grouped', ['locale' => $locale])],
     ['label' => $title ?? 'Category', 'href' => null],
   ];
 @endphp

@@ -10,10 +10,11 @@
  * - Admin routes: Protected admin panel routes
  *
  * URL Structure:
- * - /                     → Home page
- * - /catalog              → All products (paginated)
- * - /catalog/{category}   → Filtered by category (supports gender, section, or leaf)
- * - /catalog/{category}/{slug} → Individual product page
+ * - /                     → Redirects to /en
+ * - /{locale}             → Home page with locale (en, pl)
+ * - /{locale}/catalog     → All products (paginated)
+ * - /{locale}/catalog/{category}   → Filtered by category
+ * - /{locale}/catalog/{category}/{slug} → Individual product page
  * - /admin/*              → Admin panel (requires auth + admin middleware)
  */
 
@@ -21,6 +22,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\CategoryController as FrontCategoryController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController as FrontProductController;
 use App\Http\Controllers\ProfileController;
 
@@ -30,57 +32,70 @@ use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 
 /*
 |--------------------------------------------------------------------------
-| Public Routes
+| Root Redirect
 |--------------------------------------------------------------------------
-|
-| These routes are accessible to all visitors without authentication.
-|
 */
 
 Route::get('/', function () {
-    return view('home');
-})->name('home');
-
-Route::view('/contact', 'contact')->name('contact');
-Route::post('/inquiry', [ContactController::class, 'submit'])->name('inquiry.submit');
+    return redirect('/en');
+});
 
 /*
 |--------------------------------------------------------------------------
-| Catalog Routes
+| Localized Public Routes
 |--------------------------------------------------------------------------
 |
-| Product catalog browsing with hierarchical category support.
-|
-| Category slug types:
-| - Gender: "women", "men" → All products for that gender
-| - Section: "women-bags", "men-shoes" → All products in that section
-| - Leaf: "louis-vuitton-women-bags" → Specific brand category
-|
-| @see \App\Http\Controllers\CategoryController For category resolution logic
+| These routes are accessible to all visitors without authentication.
+| Prefixed with locale (en, pl).
 |
 */
 
-// Catalog index - shows all products
-Route::get('/catalog', [FrontCategoryController::class, 'index'])
-    ->name('catalog.grouped');
+Route::prefix('{locale}')
+    ->where(['locale' => 'en|pl'])
+    ->middleware('locale')
+    ->group(function () {
+        Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Category page - filtered by gender, section, or leaf category
-Route::get('/catalog/{category}', [FrontCategoryController::class, 'show'])
-    ->name('catalog.category');
+        Route::view('/contact', 'contact')->name('contact');
 
-// Individual product page
-Route::get('/catalog/{category}/{productSlug}', [FrontProductController::class, 'show'])
-    ->name('product.show');
+        /*
+        |--------------------------------------------------------------------------
+        | Catalog Routes
+        |--------------------------------------------------------------------------
+        |
+        | Product catalog browsing with hierarchical category support.
+        |
+        | Category slug types:
+        | - Gender: "women", "men" → All products for that gender
+        | - Section: "women-bags", "men-shoes" → All products in that section
+        | - Leaf: "louis-vuitton-women-bags" → Specific brand category
+        |
+        */
+
+        // Catalog index - shows all products
+        Route::get('/catalog', [FrontCategoryController::class, 'index'])
+            ->name('catalog.grouped');
+
+        // Category page - filtered by gender, section, or leaf category
+        Route::get('/catalog/{category}', [FrontCategoryController::class, 'show'])
+            ->name('catalog.category');
+
+        // Individual product page
+        Route::get('/catalog/{category}/{productSlug}', [FrontProductController::class, 'show'])
+            ->name('product.show');
+    });
 
 /*
 |--------------------------------------------------------------------------
-| API Routes (AJAX)
+| API Routes (AJAX) - Non-localized
 |--------------------------------------------------------------------------
 |
 | JSON endpoints for client-side functionality like infinite scroll.
 | Returns HTML fragments and pagination metadata.
 |
 */
+
+Route::post('/inquiry', [ContactController::class, 'submit'])->name('inquiry.submit');
 
 Route::get('/api/catalog/products', [FrontCategoryController::class, 'apiProducts'])
     ->name('api.catalog.products');
@@ -91,16 +106,23 @@ Route::get('/api/catalog/products', [FrontCategoryController::class, 'apiProduct
 |--------------------------------------------------------------------------
 |
 | 301 redirects from old URL structure to maintain SEO and existing links.
-| Old: /categories/{slug} → New: /catalog/{slug}
 |
 */
 
+Route::get('/catalog', function () {
+    return redirect('/en/catalog', 301);
+});
+
+Route::get('/catalog/{category}', function ($category) {
+    return redirect("/en/catalog/{$category}", 301);
+});
+
 Route::get('/categories/{category}', function ($category) {
-    return redirect()->route('catalog.category', ['category' => $category], 301);
+    return redirect("/en/catalog/{$category}", 301);
 });
 
 Route::get('/categories', function () {
-    return redirect()->route('catalog.grouped');
+    return redirect('/en/catalog', 301);
 });
 
 /*

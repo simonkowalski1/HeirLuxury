@@ -1,7 +1,15 @@
 @extends('layouts.public')
 
 @section('content')
-<div class="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-6 py-16">
+{{-- Loading Screen --}}
+<x-loading-screen />
+
+<div
+    x-data="{ contentVisible: false }"
+    x-init="window.addEventListener('loading-complete', () => { contentVisible = true }); setTimeout(() => contentVisible = true, 3500)"
+    :class="contentVisible ? 'opacity-100' : 'opacity-0'"
+    class="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-6 py-16 transition-opacity duration-700"
+>
 
     {{-- Decorative Background Glow --}}
     <div class="pointer-events-none absolute inset-0 opacity-40"
@@ -19,32 +27,46 @@
         {{-- MAIN HERO CONTENT (CENTERED) --}}
         <div class="relative max-w-3xl mx-auto text-center space-y-6">
 
+            {{-- HL Logo (appears after loading animation) --}}
+            <div
+                x-show="contentVisible"
+                x-transition:enter="transition ease-out duration-1000"
+                x-transition:enter-start="opacity-0 scale-75"
+                x-transition:enter-end="opacity-100 scale-100"
+                class="mb-6"
+            >
+                <img
+                    src="{{ asset('images/hl-logo-white.png') }}"
+                    alt="Heir Luxury"
+                    class="w-20 h-20 mx-auto object-contain"
+                >
+            </div>
+
             <p class="text-xs font-medium tracking-[0.38em] text-yellow-300 uppercase">
-                Collection
+                {{ __('messages.collection') }}
             </p>
 
             <h1 class="text-4xl sm:text-5xl md:text-6xl font-semibold leading-tight text-slate-50">
-                Curated Designer Pieces
-                <span class="block text-yellow-300">Verified Quality</span>
+                {{ __('messages.hero_title') }}
+                <span class="block text-yellow-300">{{ __('messages.hero_subtitle') }}</span>
             </h1>
 
             <p class="max-w-xl mx-auto text-sm sm:text-base text-slate-300/80">
-                Explore a hand-picked selection of premium accessories and apparel,
-                authenticated and styled for modern collectors.
+                {{ __('messages.hero_description') }}
             </p>
 
             <div class="flex flex-wrap justify-center items-center gap-4 pt-2">
-                <a href="{{ route('catalog.grouped') }}"
+                <a href="{{ route('catalog.grouped', ['locale' => app()->getLocale()]) }}"
                    class="inline-flex items-center rounded-full bg-yellow-400 px-6 py-2.5 text-sm font-medium
                           text-black shadow-sm hover:bg-yellow-300 transition-colors">
-                    New
+                    {{ __('messages.new') }}
                 </a>
 
-                <a href="{{ route('catalog.grouped') }}"
+                <a href="{{ route('catalog.grouped', ['locale' => app()->getLocale()]) }}"
                    class="inline-flex items-center rounded-full border border-white/20 px-6 py-2.5
                           text-sm font-medium text-slate-100 hover:border-yellow-300 hover:text-yellow-300
                           transition-colors">
-                    Collections
+                    {{ __('messages.collections') }}
                 </a>
             </div>
         </div>
@@ -62,42 +84,75 @@
             </div>
         </div>
 
-                {{-- NEW ARRIVALS CARD (MOVED BELOW HERO) --}}
-        <div class="mt-10 flex justify-center">
-            @php
-  $newArrivals = [
-    [
-      'label'  => 'Louis Vuitton Women Bags',
-      'route'  => 'catalog.category',
-      'params' => ['category' => 'louis-vuitton-women-bags'],
-    ],
-    [
-      'label'  => 'Louis Vuitton Women Shoes',
-      'route'  => 'catalog.category',
-      'params' => ['category' => 'louis-vuitton-women-shoes'],
-    ],
-  ];
-@endphp
+        {{-- NEW ADDITIONS CAROUSEL --}}
+        @if(isset($newAdditions) && $newAdditions->count() >= 3)
+        <div class="mt-10 w-full" x-data="productCarousel({{ $newAdditions->count() }})">
+            <p class="text-xs font-medium tracking-[0.3em] text-slate-300 uppercase mb-4 text-center">
+                {{ __('messages.new_additions') }}
+            </p>
 
+            <div class="relative">
+                {{-- Left Arrow --}}
+                <button
+                    type="button"
+                    @click="prev()"
+                    class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10
+                           w-10 h-10 rounded-full bg-black/60 border border-white/20
+                           text-white flex items-center justify-center
+                           hover:bg-yellow-400 hover:text-black hover:border-yellow-400
+                           transition duration-200"
+                    aria-label="Previous products"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
 
+                {{-- Carousel Container --}}
+                <div class="overflow-hidden mx-6">
+                    <div
+                        class="flex transition-transform duration-500 ease-out"
+                        :style="'transform: translateX(-' + (currentIndex * (100 / 3)) + '%)'"
+                    >
+                        @foreach($newAdditions as $product)
+                            <div class="w-1/3 flex-shrink-0 px-2">
+                                <x-product.card :product="$product" />
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
 
-            <div class="w-full max-w-lg rounded-2xl bg-white/5 border border-white/10 px-6 py-5 backdrop-blur">
-                <p class="text-xs font-medium tracking-[0.3em] text-slate-300 uppercase mb-3">
-                    New Arrivals
-                </p>
+                {{-- Right Arrow --}}
+                <button
+                    type="button"
+                    @click="next()"
+                    class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10
+                           w-10 h-10 rounded-full bg-black/60 border border-white/20
+                           text-white flex items-center justify-center
+                           hover:bg-yellow-400 hover:text-black hover:border-yellow-400
+                           transition duration-200"
+                    aria-label="Next products"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
 
-                <ul class="space-y-2 text-sm text-slate-200/90">
-                    @foreach($newArrivals as $item)
-                        <li class="flex justify-between">
-                            <span>{{ $item['label'] }}</span>
-
-                            <a href="{{ route($item['route'], $item['params']) }}"
-                               class="text-xs text-yellow-300 hover:text-yellow-200 underline-offset-2 hover:underline">
-                                View
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
+            {{-- Dots Indicator --}}
+            <div class="flex justify-center gap-2 mt-4">
+                @for($i = 0; $i < min($newAdditions->count() - 2, 7); $i++)
+                    <button
+                        type="button"
+                        @click="currentIndex = {{ $i }}"
+                        :class="currentIndex === {{ $i }}
+                            ? 'bg-yellow-400 w-6'
+                            : 'bg-white/30 w-2 hover:bg-white/50'"
+                        class="h-2 rounded-full transition-all duration-300"
+                        aria-label="Go to slide {{ $i + 1 }}"
+                    ></button>
+                @endfor
             </div>
         </div>
+        @endif
 @endsection
