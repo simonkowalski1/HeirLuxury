@@ -24,10 +24,7 @@
                 <strong>Section:</strong> {{ $product->section ?? Str::headline($product->category_slug ?? 'Bags') }}
             </p>
 
-            <p class="text-white/60 leading-relaxed max-w-md">
-                Placeholder copy for product description. This curated luxury item is part of our selected
-                {{ $product->category_slug }} collection. Contact us to inquire about availability or condition.
-            </p>
+           
 
             <button
                 type="button"

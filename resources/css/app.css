@@ -302,12 +302,6 @@ html{
 
 /* ---------- Scroll lock when mega menu open ---------- */
 
-/*
-  IMPORTANT:
-  - We do NOT change anything on <html> (no html.is-menu-open).
-  - Scrollbar styling on <html> stays constant, so there is no flash.
-  - We only pin <body> so the background page cannot scroll.
-*/
 
 body.is-menu-open {
   position: fixed;
@@ -438,4 +432,25 @@ body.is-menu-open {
 
 [x-cloak] {
     display: none !important;
+}
+
+/* ---------- Loading Screen Animation ---------- */
+
+@keyframes logoToHero {
+    0% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1) translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.5) translateY(-30vh);
+        opacity: 0;
+    }
+}
+
+.logo-animate {
+    animation: logoToHero 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }

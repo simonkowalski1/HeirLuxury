@@ -5,9 +5,12 @@
     // Catalog data
     $catalog = $catalog ?? (array) config('categories', []);
 
+    // Current locale
+    $locale = app()->getLocale();
+
     // Active slug: prefer injected value, else route param, else URL segment
     $activeSlug = $activeSlug
-        ?? ((string) request()->route('category') ?: request()->segment(2));
+        ?? ((string) request()->route('category') ?: request()->segment(3));
 
     // Default open gender
     $currentGender = 'women';
@@ -95,7 +98,7 @@ if (isset($params['slug']) && !isset($params['category'])) {
                                                 : $item['route'];
 
                                             // Add locale parameter
-                                            $params['locale'] = app()->getLocale();
+                                            $params['locale'] = $locale;
 
                                             try {
                                                 $href = route($routeName, $params);

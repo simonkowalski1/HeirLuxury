@@ -24,6 +24,7 @@
     // === Correct href for product page ===
     if ($categorySlug && $slug && Route::has('product.show')) {
         $href = route('product.show', [
+            'locale'      => app()->getLocale(),
             'category'    => $categorySlug,
             'productSlug' => $slug,
         ]);

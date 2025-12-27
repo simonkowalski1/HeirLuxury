@@ -4,7 +4,9 @@ HeirLuxury (root)
 ¦   ¦   +-- Commands
 ¦   ¦   ¦   +-- BackfillProductSlugs.php
 ¦   ¦   ¦   +-- BackfillSlugs.php
-¦   ¦   ¦   +-- ImportLvBags.php
+¦   ¦   ¦   +-- GenerateThumbnails.php
+¦   ¦   ¦   +-- ImportBrands.php
+¦   ¦   ¦   +-- ImportLV.php
 ¦   ¦   +-- Kernel.php
 ¦   +-- Http
 ¦   ¦   +-- Controllers
@@ -23,6 +25,7 @@ HeirLuxury (root)
 ¦   ¦   ¦   ¦   +-- RegisteredUserController.php
 ¦   ¦   ¦   ¦   +-- VerifyEmailController.php
 ¦   ¦   ¦   +-- CategoryController.php
+¦   ¦   ¦   +-- ContactController.php
 ¦   ¦   ¦   +-- Controller.php
 ¦   ¦   ¦   +-- HomeController.php
 ¦   ¦   ¦   +-- InquiryController.php
@@ -31,17 +34,28 @@ HeirLuxury (root)
 ¦   ¦   ¦   +-- ProfileController.php
 ¦   ¦   +-- Middleware
 ¦   ¦   ¦   +-- AdminMiddleware.php
+¦   ¦   ¦   +-- SecurityHeaders.php
+¦   ¦   ¦   +-- TrustHosts.php
 ¦   ¦   +-- Requests
 ¦   ¦   ¦   +-- Auth
 ¦   ¦   ¦   ¦   +-- LoginRequest.php
+¦   ¦   ¦   +-- ImageUploadRequest.php
 ¦   ¦   ¦   +-- ProfileUpdateRequest.php
 ¦   ¦   +-- Kernel.php
+¦   +-- Mail
+¦   ¦   +-- ContactMail.php
 ¦   +-- Models
 ¦   ¦   +-- Category.php
 ¦   ¦   +-- Product.php
 ¦   ¦   +-- User.php
+¦   +-- Observers
+¦   ¦   +-- ProductObserver.php
 ¦   +-- Providers
 ¦   ¦   +-- AppServiceProvider.php
+¦   +-- Services
+¦   ¦   +-- CatalogCache.php
+¦   ¦   +-- CategoryResolver.php
+¦   ¦   +-- ThumbnailService.php
 ¦   +-- Support
 ¦   ¦   +-- Breadcrumbs.php
 ¦   +-- View
@@ -62,10 +76,13 @@ HeirLuxury (root)
 ¦   +-- mail.php
 ¦   +-- products.php
 ¦   +-- queue.php
+¦   +-- security.php
 ¦   +-- services.php
 ¦   +-- session.php
 +-- database
 ¦   +-- factories
+¦   ¦   +-- CategoryFactory.php
+¦   ¦   +-- ProductFactory.php
 ¦   ¦   +-- UserFactory.php
 ¦   +-- migrations
 ¦   ¦   +-- 0001_01_01_000001_create_cache_table.php
@@ -77,6 +94,8 @@ HeirLuxury (root)
 ¦   ¦   +-- 2025_11_30_194726_create_users_table.php
 ¦   ¦   +-- 2025_12_01_015112_create_categories_table.php
 ¦   ¦   +-- 2025_12_07_164211_add_image_path_to_products_table.php
+¦   ¦   +-- 2025_12_14_152308_add_indexes_to_products_table.php
+¦   ¦   +-- 2025_12_14_180853_create_password_reset_tokens_table.php
 ¦   ¦   +-- create
 ¦   +-- seeders
 ¦   ¦   +-- DatabaseSeeder.php
@@ -93,7 +112,6 @@ HeirLuxury (root)
 ¦   +-- storage
 ¦   +-- .htaccess
 ¦   +-- favicon.ico
-¦   +-- hot
 ¦   +-- index.php
 ¦   +-- robots.txt
 +-- resources
@@ -161,8 +179,15 @@ HeirLuxury (root)
 ¦       ¦   +-- text-input.blade.php
 ¦       +-- contact
 ¦       ¦   +-- modal.blade.php
+¦       +-- emails
+¦       ¦   +-- contact.blade.php
 ¦       +-- errors
+¦       ¦   +-- 403.blade.php
 ¦       ¦   +-- 404.blade.php
+¦       ¦   +-- 419.blade.php
+¦       ¦   +-- 429.blade.php
+¦       ¦   +-- 500.blade.php
+¦       ¦   +-- 503.blade.php
 ¦       +-- layouts
 ¦       ¦   +-- app.blade.php
 ¦       ¦   +-- guest.blade.php
@@ -192,6 +217,9 @@ HeirLuxury (root)
 ¦   +-- web.php
 +-- tests
 ¦   +-- Feature
+¦   ¦   +-- Admin
+¦   ¦   ¦   +-- DashboardTest.php
+¦   ¦   ¦   +-- ProductControllerTest.php
 ¦   ¦   +-- Auth
 ¦   ¦   ¦   +-- AuthenticationTest.php
 ¦   ¦   ¦   +-- EmailVerificationTest.php
@@ -202,16 +230,24 @@ HeirLuxury (root)
 ¦   ¦   +-- ExampleTest.php
 ¦   ¦   +-- ProfileTest.php
 ¦   +-- Unit
+¦   ¦   +-- CatalogCacheTest.php
+¦   ¦   +-- CategoryResolverTest.php
 ¦   ¦   +-- ExampleTest.php
+¦   ¦   +-- PerformanceTest.php
+¦   ¦   +-- ThumbnailServiceTest.php
 ¦   +-- TestCase.php
 +-- .editorconfig
 +-- .env
 +-- .env.example
++-- .env.production
 +-- .gitattributes
 +-- .gitignore
++-- .phpunit.result.cache
++-- ARCHITECTURE.md
 +-- artisan
 +-- composer.json
 +-- composer.lock
++-- DEPLOY.md
 +-- heirluxury-update.ps1
 +-- npm-deps-heir.json
 +-- package.json
@@ -220,6 +256,8 @@ HeirLuxury (root)
 +-- postcss.config.js
 +-- project-tree.txt
 +-- README.md
++-- reorganize-imports.ps1
 +-- tailwind.config.js
++-- thumbnail_output.log
 +-- UPDATE-NOTES.txt
 +-- vite.config.js

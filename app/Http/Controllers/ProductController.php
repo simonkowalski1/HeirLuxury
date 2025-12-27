@@ -52,7 +52,7 @@ class ProductController extends Controller
      * @return \Illuminate\View\View
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException If product not found
      */
-    public function show(string $category, string $productSlug)
+    public function show(string $locale, string $category, string $productSlug)
     {
          // Find product by both category and slug to ensure unique URL resolution
         $product = Product::where('category_slug', $category)
@@ -125,9 +125,9 @@ class ProductController extends Controller
         $categoryLabel = Str::headline(str_replace('-', ' ', $product->category_slug));
 
         $breadcrumbs = [
-            ['label' => 'Home',          'href' => route('home')],
-            ['label' => 'Catalog',       'href' => route('catalog.grouped')],
-            ['label' => $categoryLabel,  'href' => route('catalog.category', ['category' => $product->category_slug])],
+            ['label' => 'Home',          'href' => route('home', ['locale' => $locale])],
+            ['label' => 'Catalog',       'href' => route('catalog.grouped', ['locale' => $locale])],
+            ['label' => $categoryLabel,  'href' => route('catalog.category', ['locale' => $locale, 'category' => $product->category_slug])],
             ['label' => $product->name,  'href' => null],
         ];
 

@@ -73,6 +73,7 @@ class CategoryController extends Controller
     /**
      * Display a category page (filtered by gender, section, or leaf).
      *
+     * @param string $locale Current locale (en, pl)
      * @param string $category URL slug
      * @param Request $request
      * @return \Illuminate\View\View

@@ -5,7 +5,7 @@
 <x-loading-screen />
 
 <div
-    x-data="{ contentVisible: false }"
+    x-data="{ contentVisible: sessionStorage.getItem('hl_visited') ? true : false }"
     x-init="window.addEventListener('loading-complete', () => { contentVisible = true }); setTimeout(() => contentVisible = true, 3500)"
     :class="contentVisible ? 'opacity-100' : 'opacity-0'"
     class="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-6 py-16 transition-opacity duration-700"
@@ -36,7 +36,7 @@
                 class="mb-6"
             >
                 <img
-                    src="{{ asset('images/hl-logo-white.png') }}"
+                    src="{{ asset('img/hl-logo-panel.png') }}"
                     alt="Heir Luxury"
                     class="w-20 h-20 mx-auto object-contain"
                 >
@@ -56,11 +56,6 @@
             </p>
 
             <div class="flex flex-wrap justify-center items-center gap-4 pt-2">
-                <a href="{{ route('catalog.grouped', ['locale' => app()->getLocale()]) }}"
-                   class="inline-flex items-center rounded-full bg-yellow-400 px-6 py-2.5 text-sm font-medium
-                          text-black shadow-sm hover:bg-yellow-300 transition-colors">
-                    {{ __('messages.new') }}
-                </a>
 
                 <a href="{{ route('catalog.grouped', ['locale' => app()->getLocale()]) }}"
                    class="inline-flex items-center rounded-full border border-white/20 px-6 py-2.5
@@ -115,8 +110,28 @@
                         :style="'transform: translateX(-' + (currentIndex * (100 / 3)) + '%)'"
                     >
                         @foreach($newAdditions as $product)
+                            @php
+                                $productHref = route('product.show', [
+                                    'locale' => app()->getLocale(),
+                                    'category' => $product->category_slug,
+                                    'productSlug' => $product->slug,
+                                ]);
+                                $thumbnailService = app(\App\Services\ThumbnailService::class);
+                                $img = $product->image_path
+                                    ? ($thumbnailService->getUrl($product->image_path, 'card') ?? Storage::url($product->image_path))
+                                    : asset('assets/placeholders/product-dark.png');
+                            @endphp
                             <div class="w-1/3 flex-shrink-0 px-2">
-                                <x-product.card :product="$product" />
+                                <a href="{{ $productHref }}"
+                                   class="block aspect-[4/3] rounded-2xl overflow-hidden border border-white/10
+                                          hover:border-amber-400/80 transition duration-300">
+                                    <img
+                                        src="{{ $img }}"
+                                        alt="{{ $product->name }}"
+                                        class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                                        loading="lazy"
+                                    >
+                                </a>
                             </div>
                         @endforeach
                     </div>

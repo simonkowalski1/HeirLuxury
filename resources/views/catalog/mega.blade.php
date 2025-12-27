@@ -8,6 +8,8 @@
 
     $menSections = $menSections
         ?? collect(config('categories.men') ?? []);
+
+    $locale = app()->getLocale();
 @endphp
 
 
@@ -62,6 +64,9 @@
             }
         }
 
+        // Add locale parameter
+        $params['locale'] = $locale;
+
         $url = route($routeName, $params);
     } else {
         // Fallback: plain href or '#'
@@ -81,11 +86,12 @@
         @endforeach
     </div>
 
-    {{-- MEN PANEL --}}
+    {{-- MEN PANEL (centered - only 3 columns) --}}
     <div
         x-show="gender === 'men'"
         x-transition.opacity
-        class="mega-grid"
+        class="mega-grid justify-center"
+        style="grid-template-columns: repeat(3, minmax(0, max-content));"
     >
         @foreach ($menSections as $sectionLabel => $items)
             <section class="mega-col">
@@ -111,6 +117,9 @@
                 $params = ['category' => $params['slug']];
             }
         }
+
+        // Add locale parameter
+        $params['locale'] = $locale;
 
         $url = route($routeName, $params);
     } else {

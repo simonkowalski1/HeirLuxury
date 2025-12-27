@@ -1,5 +1,6 @@
 {{-- resources/views/components/loading-screen.blade.php --}}
 {{-- Loading animation that transitions logo from center to hero section --}}
+{{-- Only shows on first visit (uses sessionStorage to track) --}}
 <div
     x-data="loadingScreen()"
     x-show="visible"
@@ -12,22 +13,34 @@
 >
     {{-- HL Logo Image --}}
     <img
-        src="{{ asset('images/hl-logo-white.png') }}"
+        src="{{ asset('img/hl-logo-loading.png') }}"
         alt="Heir Luxury"
         :class="animating ? 'logo-animate' : ''"
-        class="w-32 h-32 object-contain transition-all"
-        :style="animating ? getAnimationStyle() : ''"
+        class="w-32 h-32 object-contain"
     >
 </div>
 
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('loadingScreen', () => ({
-        visible: true,
+        visible: false,
         animating: false,
-        targetRect: null,
 
         init() {
+            // Only show loading animation on first visit (per session)
+            const hasVisited = sessionStorage.getItem('hl_visited');
+
+            if (hasVisited) {
+                // Already visited - skip animation, show content immediately
+                this.visible = false;
+                window.dispatchEvent(new CustomEvent('loading-complete'));
+                return;
+            }
+
+            // First visit - show animation
+            sessionStorage.setItem('hl_visited', 'true');
+            this.visible = true;
+
             // Start animation after a brief delay
             setTimeout(() => {
                 this.startAnimation();
@@ -38,12 +51,6 @@ document.addEventListener('alpine:init', () => {
             this.animating = true;
         },
 
-        getAnimationStyle() {
-            return `
-                animation: logoToHero 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-            `;
-        },
-
         onAnimationEnd() {
             // Dispatch event to show the logo in the hero
             window.dispatchEvent(new CustomEvent('loading-complete'));
@@ -52,24 +59,3 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 </script>
-
-<style>
-@keyframes logoToHero {
-    0% {
-        transform: scale(1) translateY(0);
-        opacity: 1;
-    }
-    50% {
-        transform: scale(1.1) translateY(0);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(0.5) translateY(-30vh);
-        opacity: 0;
-    }
-}
-
-.logo-animate {
-    animation: logoToHero 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-</style>
