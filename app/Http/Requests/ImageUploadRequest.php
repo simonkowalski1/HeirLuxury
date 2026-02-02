@@ -58,7 +58,7 @@ class ImageUploadRequest extends FormRequest
     {
         return [
             'image.mimetypes' => 'The file must be a valid image (JPEG, PNG, GIF, or WebP).',
-            'image.max' => 'The image must not exceed ' . (config('security.uploads.max_size', 10240) / 1024) . 'MB.',
+            'image.max' => 'The image must not exceed '.(config('security.uploads.max_size', 10240) / 1024).'MB.',
         ];
     }
 }

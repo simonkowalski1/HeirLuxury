@@ -26,7 +26,7 @@ class CategoryResolver
     /**
      * Resolve a URL slug to an array of database category_slug values.
      *
-     * @param string $slug URL slug from route parameter
+     * @param  string  $slug  URL slug from route parameter
      * @return array{slugs: array<string>, active: array{slug: string, gender: ?string, section: ?string, name: string, type: string}}
      */
     public function resolve(string $slug): array
@@ -36,11 +36,11 @@ class CategoryResolver
 
         // Default active category info
         $active = [
-            'slug'    => $slug,
-            'gender'  => null,
+            'slug' => $slug,
+            'gender' => null,
             'section' => null,
-            'name'    => Str::headline(str_replace('-', ' ', $slug)),
-            'type'    => 'leaf',
+            'name' => Str::headline(str_replace('-', ' ', $slug)),
+            'type' => 'leaf',
         ];
 
         $slugsForQuery = [];
@@ -51,17 +51,27 @@ class CategoryResolver
             // Gender slug (women/men) → all leaf categories for that gender
             if (in_array($slug, ['women', 'men'], true)) {
                 foreach ($items as $item) {
-                    if (($item['type'] ?? null) !== 'leaf') continue;
-                    if (($item['gender'] ?? null) !== $slug) continue;
+                    if (($item['type'] ?? null) !== 'leaf') {
+                        continue;
+                    }
+                    if (($item['gender'] ?? null) !== $slug) {
+                        continue;
+                    }
                     $slugsForQuery[] = $item['slug'];
                 }
             }
             // Section slug (women-bags) → all leaf categories in that section
             elseif (($active['type'] ?? null) === 'group' && $active['section']) {
                 foreach ($items as $item) {
-                    if (($item['type'] ?? null) !== 'leaf') continue;
-                    if (($item['gender'] ?? null) !== $active['gender']) continue;
-                    if (($item['section'] ?? null) !== $active['section']) continue;
+                    if (($item['type'] ?? null) !== 'leaf') {
+                        continue;
+                    }
+                    if (($item['gender'] ?? null) !== $active['gender']) {
+                        continue;
+                    }
+                    if (($item['section'] ?? null) !== $active['section']) {
+                        continue;
+                    }
                     $slugsForQuery[] = $item['slug'];
                 }
             }
@@ -75,7 +85,7 @@ class CategoryResolver
         }
 
         return [
-            'slugs'  => array_values(array_unique(array_filter($slugsForQuery))),
+            'slugs' => array_values(array_unique(array_filter($slugsForQuery))),
             'active' => $active,
         ];
     }
@@ -91,50 +101,56 @@ class CategoryResolver
             $catalog = (array) config('categories', []);
             $items = [];
 
-            $fromHref = fn($href) => trim(str_replace('/categories/', '', (string) $href), '/');
+            $fromHref = fn ($href) => trim(str_replace('/categories/', '', (string) $href), '/');
 
             foreach (['women', 'men'] as $gender) {
-                if (!isset($catalog[$gender]) || !is_array($catalog[$gender])) continue;
+                if (! isset($catalog[$gender]) || ! is_array($catalog[$gender])) {
+                    continue;
+                }
 
                 foreach ($catalog[$gender] as $section => $links) {
-                    if (!is_array($links)) continue;
+                    if (! is_array($links)) {
+                        continue;
+                    }
 
                     $sectionSlug = Str::of($section)->lower()->slug('-')->toString();
 
                     // Synthetic section slug: women-bags, men-shoes, etc.
                     $items["{$gender}-{$sectionSlug}"] = [
-                        'slug'    => "{$gender}-{$sectionSlug}",
-                        'gender'  => $gender,
+                        'slug' => "{$gender}-{$sectionSlug}",
+                        'gender' => $gender,
                         'section' => $section,
-                        'name'    => "All " . ucfirst($gender) . " " . $section,
-                        'type'    => 'group',
+                        'name' => 'All '.ucfirst($gender).' '.$section,
+                        'type' => 'group',
                     ];
 
                     foreach ($links as $link) {
                         $rawSlug = $link['params']['category']
                             ?? (isset($link['href']) ? $fromHref($link['href']) : null);
-                        if (!$rawSlug) continue;
+                        if (! $rawSlug) {
+                            continue;
+                        }
 
                         $leafSlug = Str::of($rawSlug)->lower()->slug('-')->toString();
 
                         // Leaf slug: louis-vuitton-women-bags (matches products.category_slug)
                         $items[$leafSlug] = [
-                            'slug'    => $leafSlug,
-                            'gender'  => $gender,
+                            'slug' => $leafSlug,
+                            'gender' => $gender,
                             'section' => $section,
-                            'name'    => $link['name'] ?? Str::headline($leafSlug),
-                            'type'    => 'leaf',
+                            'name' => $link['name'] ?? Str::headline($leafSlug),
+                            'type' => 'leaf',
                         ];
                     }
                 }
 
                 // Synthetic gender slug: women, men
                 $items[$gender] = [
-                    'slug'    => $gender,
-                    'gender'  => $gender,
+                    'slug' => $gender,
+                    'gender' => $gender,
                     'section' => null,
-                    'name'    => "All " . ucfirst($gender),
-                    'type'    => 'group',
+                    'name' => 'All '.ucfirst($gender),
+                    'type' => 'group',
                 ];
             }
 
@@ -144,19 +160,16 @@ class CategoryResolver
 
     /**
      * Get the full catalog config (for navigation rendering).
-     *
-     * @return array
      */
     public function getCatalog(): array
     {
-        return Cache::remember('catalog.config', self::MAP_CACHE_TTL, fn() => (array) config('categories', []));
+        return Cache::remember('catalog.config', self::MAP_CACHE_TTL, fn () => (array) config('categories', []));
     }
 
     /**
      * Generate a hash for cache keys from slug array.
      *
-     * @param array<string> $slugs
-     * @return string
+     * @param  array<string>  $slugs
      */
     public function hashSlugs(array $slugs): string
     {
@@ -164,6 +177,7 @@ class CategoryResolver
             return 'all';
         }
         sort($slugs);
+
         return md5(implode(',', $slugs));
     }
 }

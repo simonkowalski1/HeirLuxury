@@ -15,13 +15,14 @@ class Breadcrumbs
             return [];
         }
 
-        $name  = $route->getName();
+        $name = $route->getName();
         $items = [];
 
         // Always start with Home
+        $locale = $route->parameter('locale') ?? app()->getLocale() ?? 'en';
         $items[] = [
             'label' => 'Home',
-            'href'  => route('home'),
+            'href' => route('home', ['locale' => $locale]),
         ];
 
         switch ($name) {
@@ -38,7 +39,7 @@ class Breadcrumbs
 
                 $items[] = [
                     'label' => $label,
-                    'href'  => null,
+                    'href' => null,
                 ];
                 break;
 
@@ -47,7 +48,7 @@ class Breadcrumbs
                 // but we still provide a fallback
                 $items[] = [
                     'label' => 'Product',
-                    'href'  => null,
+                    'href' => null,
                 ];
                 break;
 
@@ -55,7 +56,7 @@ class Breadcrumbs
                 // Fallback: turn "some.route" into "Some Route"
                 $items[] = [
                     'label' => Str::headline(str_replace('.', ' ', $name)),
-                    'href'  => null,
+                    'href' => null,
                 ];
                 break;
         }

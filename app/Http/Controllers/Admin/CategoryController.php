@@ -55,7 +55,6 @@ class CategoryController extends Controller
      * Validates input and auto-generates slug if not provided.
      * Slug must be unique across all categories.
      *
-     * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
@@ -79,7 +78,7 @@ class CategoryController extends Controller
     /**
      * Show the category edit form.
      *
-     * @param Category $category Route model binding
+     * @param  Category  $category  Route model binding
      * @return \Illuminate\View\View
      */
     public function edit(Category $category)
@@ -92,15 +91,14 @@ class CategoryController extends Controller
      *
      * Slug uniqueness is validated excluding the current category.
      *
-     * @param Request $request
-     * @param Category $category Route model binding
+     * @param  Category  $category  Route model binding
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, Category $category)
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:255', 'unique:categories,slug,' . $category->id],
+            'slug' => ['nullable', 'string', 'max:255', 'unique:categories,slug,'.$category->id],
         ]);
 
         // Auto-generate slug from name if not provided
@@ -120,7 +118,7 @@ class CategoryController extends Controller
      * Warning: This does not cascade to products. Products referencing
      * this category's slug will still have that category_slug value.
      *
-     * @param Category $category Route model binding
+     * @param  Category  $category  Route model binding
      * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Category $category)

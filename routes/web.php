@@ -18,17 +18,15 @@
  * - /admin/*              → Admin panel (requires auth + admin middleware)
  */
 
-use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\CategoryController as FrontCategoryController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController as FrontProductController;
 use App\Http\Controllers\ProfileController;
-
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Admin\ProductController as AdminProductController;
-use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -176,4 +174,4 @@ Route::middleware(['auth', 'admin'])
 |
 */
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

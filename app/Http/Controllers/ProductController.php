@@ -8,6 +8,7 @@ use App\Services\ThumbnailService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+
 /**
  * Handles individual product detail pages.
  *
@@ -32,7 +33,8 @@ class ProductController extends Controller
         protected ThumbnailService $thumbnailService,
         protected CatalogCache $catalogCache
     ) {}
-        /**
+
+    /**
      * Display a single product's detail page.
      *
      * This method handles the product detail view, including:
@@ -47,14 +49,15 @@ class ProductController extends Controller
      * - Each image gets three versions: thumb (96px), gallery (800px), original
      * - ThumbnailService generates WebP thumbnails on-demand
      *
-     * @param string $category The category_slug (e.g., "louis-vuitton-women-bags")
-     * @param string $productSlug The product's unique slug within its category
+     * @param  string  $category  The category_slug (e.g., "louis-vuitton-women-bags")
+     * @param  string  $productSlug  The product's unique slug within its category
      * @return \Illuminate\View\View
+     *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException If product not found
      */
     public function show(string $locale, string $category, string $productSlug)
     {
-         // Find product by both category and slug to ensure unique URL resolution
+        // Find product by both category and slug to ensure unique URL resolution
         $product = Product::where('category_slug', $category)
             ->where('slug', $productSlug)
             ->firstOrFail();
@@ -77,7 +80,7 @@ class ProductController extends Controller
         // Build gallery from product's image folder in storage
         if ($baseFolder && $product->folder) {
             $disk = Storage::disk('public');
-            $dir  = "imports/{$baseFolder}/{$product->folder}";
+            $dir = "imports/{$baseFolder}/{$product->folder}";
 
             if ($disk->exists($dir)) {
                 // Cache file listing to avoid repeated filesystem scans
@@ -93,35 +96,35 @@ class ProductController extends Controller
                             ->all();
                     }
                 );
-/*
-                 * Build image array with three sizes for each image:
-                 * - src: Gallery size (800x800) for main display
-                 * - thumb: Thumbnail (96x96) for gallery navigation strip
-                 * - original: Full resolution for zoom/download
-                 */
+                /*
+                                 * Build image array with three sizes for each image:
+                                 * - src: Gallery size (800x800) for main display
+                                 * - thumb: Thumbnail (96x96) for gallery navigation strip
+                                 * - original: Full resolution for zoom/download
+                                 */
                 $images = collect($files)->map(function (string $path) use ($disk, $product) {
                     return [
-                        'src'      => $this->thumbnailService->getUrl($path, 'gallery') ?? $disk->url($path),
-                        'thumb'    => $this->thumbnailService->getUrl($path, 'thumb') ?? $disk->url($path),
+                        'src' => $this->thumbnailService->getUrl($path, 'gallery') ?? $disk->url($path),
+                        'thumb' => $this->thumbnailService->getUrl($path, 'thumb') ?? $disk->url($path),
                         'original' => $disk->url($path),
-                        'alt'      => $product->name,
+                        'alt' => $product->name,
                     ];
                 })->all();
             }
         }
-  // Fallback: use the single image_path if no folder-based gallery exists
+        // Fallback: use the single image_path if no folder-based gallery exists
         if (empty($images) && $product->image_path) {
             $disk = Storage::disk('public');
             $images[] = [
-                'src'      => $this->thumbnailService->getUrl($product->image_path, 'gallery') ?? $disk->url($product->image_path),
-                'thumb'    => $this->thumbnailService->getUrl($product->image_path, 'thumb') ?? $disk->url($product->image_path),
+                'src' => $this->thumbnailService->getUrl($product->image_path, 'gallery') ?? $disk->url($product->image_path),
+                'thumb' => $this->thumbnailService->getUrl($product->image_path, 'thumb') ?? $disk->url($product->image_path),
                 'original' => $disk->url($product->image_path),
-                'alt'      => $product->name,
+                'alt' => $product->name,
             ];
         }
-// Load related products using versioned cache (IDs only for lightweight caching)
+        // Load related products using versioned cache (IDs only for lightweight caching)
         $related = $this->getRelatedProducts($product);
-// Build breadcrumb trail: Home > Catalog > Category > Product
+        // Build breadcrumb trail: Home > Catalog > Category > Product
         $categoryLabel = Str::headline(str_replace('-', ' ', $product->category_slug));
 
         $breadcrumbs = [
@@ -132,19 +135,19 @@ class ProductController extends Controller
         ];
 
         return view('catalog.product', [
-            'product'     => $product,
-            'images'      => $images,
-            'related'     => $related,
+            'product' => $product,
+            'images' => $images,
+            'related' => $related,
             'breadcrumbs' => $breadcrumbs,
         ]);
     }
-/**
+
+    /**
      * Get related products with versioned caching.
      *
      * Caches only IDs to reduce memory, then hydrates.
      * Uses catalog version for instant invalidation when products change.
      *
-     * @param Product $product
      * @return \Illuminate\Database\Eloquent\Collection
      */
     protected function getRelatedProducts(Product $product)
@@ -164,11 +167,11 @@ class ProductController extends Controller
         if (empty($ids)) {
             return collect();
         }
-// Fetch and sort in PHP to be database-agnostic (SQLite lacks FIELD())
+        // Fetch and sort in PHP to be database-agnostic (SQLite lacks FIELD())
         $products = Product::whereIn('id', $ids)->get();
         $idOrder = array_flip($ids);
 
-        return $products->sortBy(fn($p) => $idOrder[$p->id] ?? PHP_INT_MAX)->values();
+        return $products->sortBy(fn ($p) => $idOrder[$p->id] ?? PHP_INT_MAX)->values();
     }
 
     /**
@@ -177,7 +180,7 @@ class ProductController extends Controller
      * Converts category_slug format ({brand}-{gender}-{section})
      * to storage folder format ({brand-prefix}-{section}-{gender}).
      *
-     * @param string $categorySlug e.g., "louis-vuitton-women-bags"
+     * @param  string  $categorySlug  e.g., "louis-vuitton-women-bags"
      * @return string|null e.g., "lv-bags-women"
      */
     protected function resolveStorageFolder(string $categorySlug): ?string
@@ -185,9 +188,17 @@ class ProductController extends Controller
         // Brand prefix mapping
         $brandPrefixes = [
             'louis-vuitton' => 'lv',
-            'chanel'        => 'chanel',
-            'dior'          => 'dior',
-            'hermes'        => 'hermes',
+            'chanel' => 'chanel',
+            'dior' => 'dior',
+            'hermes' => 'hermes',
+            'celine' => 'celine',
+            'givenchy' => 'givenchy',
+            'mcqueen' => 'mcqueen',
+            'moncler' => 'moncler',
+            'nike' => 'nike',
+            'offwhite' => 'offwhite',
+            'versace' => 'versace',
+            'yeezy' => 'yeezy',
         ];
 
         // Parse: {brand}-{gender}-{section}
@@ -199,6 +210,7 @@ class ProductController extends Controller
                 if (preg_match('/^(women|men)-(.+)$/', $rest, $matches)) {
                     $gender = $matches[1];
                     $section = $matches[2];
+
                     return "{$prefix}-{$section}-{$gender}";
                 }
             }

@@ -30,8 +30,8 @@ class ProductFactory extends Factory
             'brand' => $brand,
             'gender' => $gender,
             'section' => $section,
-            'category_slug' => Str::slug($brand) . '-' . $gender . '-' . $section,
-            'folder' => Str::slug($brand) . '-' . $section . '-' . $gender . '/' . Str::slug($name),
+            'category_slug' => Str::slug($brand).'-'.$gender.'-'.$section,
+            'folder' => Str::slug($brand).'-'.$section.'-'.$gender.'/'.Str::slug($name),
             'image' => '0000.jpg',
         ];
     }

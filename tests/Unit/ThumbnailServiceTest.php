@@ -28,7 +28,7 @@ class ThumbnailServiceTest extends TestCase
         parent::setUp();
         // Use array driver for tests to avoid database dependency
         config(['cache.default' => 'array']);
-        $this->service = new ThumbnailService();
+        $this->service = new ThumbnailService;
     }
 
     /**
@@ -150,13 +150,13 @@ class ThumbnailServiceTest extends TestCase
 
         // Pre-populate cache
         foreach (array_keys(ThumbnailService::SIZES) as $size) {
-            $cacheKey = "thumbnail_url:{$size}:" . md5($path);
+            $cacheKey = "thumbnail_url:{$size}:".md5($path);
             Cache::put($cacheKey, 'http://example.com/test.webp', 3600);
         }
 
         // Verify cache is set
         foreach (array_keys(ThumbnailService::SIZES) as $size) {
-            $cacheKey = "thumbnail_url:{$size}:" . md5($path);
+            $cacheKey = "thumbnail_url:{$size}:".md5($path);
             $this->assertTrue(Cache::has($cacheKey), "Cache should exist for size '{$size}'");
         }
 
@@ -165,7 +165,7 @@ class ThumbnailServiceTest extends TestCase
 
         // Verify cache is cleared
         foreach (array_keys(ThumbnailService::SIZES) as $size) {
-            $cacheKey = "thumbnail_url:{$size}:" . md5($path);
+            $cacheKey = "thumbnail_url:{$size}:".md5($path);
             $this->assertFalse(Cache::has($cacheKey), "Cache should be cleared for size '{$size}'");
         }
     }

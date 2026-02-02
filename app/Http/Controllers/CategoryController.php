@@ -40,7 +40,6 @@ class CategoryController extends Controller
     /**
      * Display the main catalog page (all products).
      *
-     * @param Request $request
      * @return \Illuminate\View\View
      */
     public function index(Request $request)
@@ -54,9 +53,9 @@ class CategoryController extends Controller
             $ids = (clone $query)->forPage($page, self::PER_PAGE)->pluck('id')->all();
 
             return [
-                'ids'       => $ids,
-                'total'     => $total,
-                'per_page'  => self::PER_PAGE,
+                'ids' => $ids,
+                'total' => $total,
+                'per_page' => self::PER_PAGE,
                 'last_page' => (int) ceil($total / self::PER_PAGE),
             ];
         });
@@ -65,7 +64,7 @@ class CategoryController extends Controller
         $products = $this->hydrateProducts($cached['ids'], $page, $cached);
 
         return view('catalog.categories', [
-            'title'    => 'All Categories',
+            'title' => 'All Categories',
             'products' => $products,
         ]);
     }
@@ -73,9 +72,8 @@ class CategoryController extends Controller
     /**
      * Display a category page (filtered by gender, section, or leaf).
      *
-     * @param string $locale Current locale (en, pl)
-     * @param string $category URL slug
-     * @param Request $request
+     * @param  string  $locale  Current locale (en, pl)
+     * @param  string  $category  URL slug
      * @return \Illuminate\View\View
      */
     public function show(string $locale, string $category, Request $request)
@@ -93,16 +91,16 @@ class CategoryController extends Controller
         // Cache product IDs only (deterministic pagination)
         $cached = $this->catalogCache->remember($slugsHash, $page, function () use ($slugsForQuery, $page) {
             $query = Product::query()
-                ->when(count($slugsForQuery) > 0, fn($q) => $q->whereIn('category_slug', $slugsForQuery))
+                ->when(count($slugsForQuery) > 0, fn ($q) => $q->whereIn('category_slug', $slugsForQuery))
                 ->orderBy('id', 'asc');
 
             $total = $query->count();
             $ids = (clone $query)->forPage($page, self::PER_PAGE)->pluck('id')->all();
 
             return [
-                'ids'       => $ids,
-                'total'     => $total,
-                'per_page'  => self::PER_PAGE,
+                'ids' => $ids,
+                'total' => $total,
+                'per_page' => self::PER_PAGE,
                 'last_page' => (int) ceil($total / self::PER_PAGE),
             ];
         });
@@ -122,19 +120,18 @@ class CategoryController extends Controller
         $navCatalog = $navGender && isset($catalog[$navGender]) ? $catalog[$navGender] : $catalog;
 
         return view('catalog.categories', [
-            'slug'       => $slug,
-            'title'      => $active['name'],
-            'active'     => $active,
-            'catalog'    => $catalog,
+            'slug' => $slug,
+            'title' => $active['name'],
+            'active' => $active,
+            'catalog' => $catalog,
             'navCatalog' => $navCatalog,
-            'products'   => $products,
+            'products' => $products,
         ]);
     }
 
     /**
      * API endpoint for infinite scroll - returns product cards HTML.
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function apiProducts(Request $request)
@@ -154,16 +151,16 @@ class CategoryController extends Controller
         // Cache product IDs only (deterministic pagination)
         $cached = $this->catalogCache->remember($slugsHash, $page, function () use ($slugsForQuery, $page) {
             $query = Product::query()
-                ->when(count($slugsForQuery) > 0, fn($q) => $q->whereIn('category_slug', $slugsForQuery))
+                ->when(count($slugsForQuery) > 0, fn ($q) => $q->whereIn('category_slug', $slugsForQuery))
                 ->orderBy('id', 'asc');
 
             $total = $query->count();
             $ids = (clone $query)->forPage($page, self::PER_PAGE)->pluck('id')->all();
 
             return [
-                'ids'       => $ids,
-                'total'     => $total,
-                'per_page'  => self::PER_PAGE,
+                'ids' => $ids,
+                'total' => $total,
+                'per_page' => self::PER_PAGE,
                 'last_page' => (int) ceil($total / self::PER_PAGE),
             ];
         });
@@ -180,20 +177,19 @@ class CategoryController extends Controller
         }
 
         return response()->json([
-            'html'     => $html,
-            'hasMore'  => $page < $cached['last_page'],
+            'html' => $html,
+            'hasMore' => $page < $cached['last_page'],
             'nextPage' => $page + 1,
-            'total'    => $cached['total'],
+            'total' => $cached['total'],
         ]);
     }
 
     /**
      * Hydrate products from cached IDs into a LengthAwarePaginator.
      *
-     * @param array<int> $ids Product IDs in display order
-     * @param int $page Current page number
-     * @param array $cached Cached pagination metadata
-     * @return LengthAwarePaginator
+     * @param  array<int>  $ids  Product IDs in display order
+     * @param  int  $page  Current page number
+     * @param  array  $cached  Cached pagination metadata
      */
     protected function hydrateProducts(array $ids, int $page, array $cached): LengthAwarePaginator
     {
@@ -214,7 +210,7 @@ class CategoryController extends Controller
      * Uses PHP-based sorting for database-agnostic compatibility
      * (MySQL FIELD() is not supported in SQLite).
      *
-     * @param array<int> $ids Product IDs
+     * @param  array<int>  $ids  Product IDs
      * @return \Illuminate\Support\Collection
      */
     protected function getProductsByIds(array $ids)
@@ -227,6 +223,6 @@ class CategoryController extends Controller
         $products = Product::whereIn('id', $ids)->get();
         $idOrder = array_flip($ids);
 
-        return $products->sortBy(fn($p) => $idOrder[$p->id] ?? PHP_INT_MAX)->values();
+        return $products->sortBy(fn ($p) => $idOrder[$p->id] ?? PHP_INT_MAX)->values();
     }
 }

@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Product;
 use App\Services\ThumbnailService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
-use App\Models\Product;
 
 /**
  * Import luxury product catalogs from folder structure into the database.
@@ -49,31 +49,32 @@ class ImportLV extends Command
      * Brand name mapping from folder prefix to full brand name.
      */
     protected array $brandMap = [
-        'lv'     => 'louis-vuitton',
+        'lv' => 'louis-vuitton',
         'chanel' => 'chanel',
-        'dior'   => 'dior',
+        'dior' => 'dior',
         'hermes' => 'hermes',
     ];
 
     /**
      * Execute the import process.
      *
-     * @param ThumbnailService $thumbnailService Injected service for thumbnail generation
+     * @param  ThumbnailService  $thumbnailService  Injected service for thumbnail generation
      * @return int Command::SUCCESS or Command::FAILURE
      */
     public function handle(ThumbnailService $thumbnailService)
     {
         $base = storage_path('app/public/imports');
 
-        if (!is_dir($base)) {
+        if (! is_dir($base)) {
             $this->error("Folder not found: $base");
+
             return Command::FAILURE;
         }
 
         // Clear all products if --fresh flag is provided
         if ($this->option('fresh')) {
             Product::truncate();
-            $this->warn("Cleared all existing products.");
+            $this->warn('Cleared all existing products.');
         }
 
         // Get all category folders (excluding . and ..)
@@ -88,8 +89,9 @@ class ImportLV extends Command
             // e.g., "lv-bags-women", "chanel-shoes-men", "hermes-belts-women"
             $parsed = $this->parseFolderName($folder);
 
-            if (!$parsed) {
+            if (! $parsed) {
                 $this->warn("Skipping unrecognized folder: $folder");
+
                 continue;
             }
 
@@ -106,19 +108,23 @@ class ImportLV extends Command
 
             // Process each product subfolder within the category
             foreach (scandir($path) as $dir) {
-                if ($dir === '.' || $dir === '..') continue;
+                if ($dir === '.' || $dir === '..') {
+                    continue;
+                }
 
                 $productDir = "$path/$dir";
-                if (!is_dir($productDir)) continue;
+                if (! is_dir($productDir)) {
+                    continue;
+                }
 
                 // Collect all image files (jpg, jpeg, png, webp)
-                $images = array_values(array_filter(scandir($productDir), fn ($f) =>
-                    preg_match('/\.(jpg|jpeg|png|webp)$/i', $f)
+                $images = array_values(array_filter(scandir($productDir), fn ($f) => preg_match('/\.(jpg|jpeg|png|webp)$/i', $f)
                 ));
 
                 // Skip folders with no images
                 if (empty($images)) {
                     $this->warn("  ⭕ Skipping $dir — No images");
+
                     continue;
                 }
 
@@ -138,21 +144,21 @@ class ImportLV extends Command
                 Product::updateOrCreate(
                     [
                         'category_slug' => $categorySlug,
-                        'name'          => $dir,
+                        'name' => $dir,
                     ],
                     [
-                        'slug'       => Str::slug($dir),
-                        'folder'     => $dir,
-                        'brand'      => $brand,
-                        'gender'     => $gender,
-                        'section'    => $section,
-                        'image'      => $firstImage,
+                        'slug' => Str::slug($dir),
+                        'folder' => $dir,
+                        'brand' => $brand,
+                        'gender' => $gender,
+                        'section' => $section,
+                        'image' => $firstImage,
                         'image_path' => $imagePath,
                     ]
                 );
 
                 // Generate optimized thumbnails for all images unless skipped
-                if (!$this->option('skip-thumbnails')) {
+                if (! $this->option('skip-thumbnails')) {
                     foreach ($images as $img) {
                         $imgPath = "imports/$folder/$dir/$img";
                         $thumbnailService->generateAll($imgPath);
@@ -164,10 +170,11 @@ class ImportLV extends Command
             }
 
             $this->info("  ✔ Imported $folderCount products");
-            $this->line("");
+            $this->line('');
         }
 
         $this->info("🎉 Import complete! Total products: $totalImported");
+
         return Command::SUCCESS;
     }
 
@@ -176,15 +183,12 @@ class ImportLV extends Command
      *
      * Supports formats:
      * - {brand}-{section}-{gender} (e.g., lv-bags-women, chanel-shoes-men)
-     *
-     * @param string $folder
-     * @return array|null
      */
     protected function parseFolderName(string $folder): ?array
     {
         // Pattern: brand-section-gender
         // e.g., lv-bags-women, chanel-shoes-men, hermes-belts-women
-        if (!preg_match('/^([a-z]+)-([a-z]+)-(women|men)$/i', $folder, $matches)) {
+        if (! preg_match('/^([a-z]+)-([a-z]+)-(women|men)$/i', $folder, $matches)) {
             return null;
         }
 
@@ -200,11 +204,11 @@ class ImportLV extends Command
         $categorySlug = "{$brand}-{$gender}-{$section}";
 
         return [
-            'brand'         => $brand,
-            'section'       => $section,
-            'gender'        => $gender,
+            'brand' => $brand,
+            'section' => $section,
+            'gender' => $gender,
             'category_slug' => $categorySlug,
-            'folder'        => $folder,
+            'folder' => $folder,
         ];
     }
 }

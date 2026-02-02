@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -30,7 +30,6 @@ class ProductController extends Controller
     /**
      * Display paginated list of all products with search and filter.
      *
-     * @param Request $request
      * @return \Illuminate\View\View
      */
     public function index(Request $request)
@@ -41,7 +40,7 @@ class ProductController extends Controller
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('slug', 'like', "%{$search}%");
+                    ->orWhere('slug', 'like', "%{$search}%");
             });
         }
 
@@ -88,20 +87,19 @@ class ProductController extends Controller
      * Validates input, auto-generates slug if not provided,
      * and handles image upload to storage/app/public/products.
      *
-     * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'          => ['required', 'string', 'max:255'],
-            'slug'          => ['nullable', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255'],
             'category_slug' => ['nullable', 'string', 'max:255'],
-            'gender'        => ['nullable', 'string', 'max:50'],
-            'brand'         => ['nullable', 'string', 'max:100'],
-            'section'       => ['nullable', 'string', 'max:100'],
-            'folder'        => ['nullable', 'string', 'max:255'],
-            'image'         => ['nullable', 'image', 'max:4096'],
+            'gender' => ['nullable', 'string', 'max:50'],
+            'brand' => ['nullable', 'string', 'max:100'],
+            'section' => ['nullable', 'string', 'max:100'],
+            'folder' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable', 'image', 'max:4096'],
         ]);
 
         // Auto-generate slug from name if not provided
@@ -124,7 +122,7 @@ class ProductController extends Controller
     /**
      * Show the product edit form.
      *
-     * @param Product $product Route model binding
+     * @param  Product  $product  Route model binding
      * @return \Illuminate\View\View
      */
     public function edit(Product $product)
@@ -139,21 +137,20 @@ class ProductController extends Controller
      *
      * Handles image replacement (deletes old image when new one uploaded).
      *
-     * @param Request $request
-     * @param Product $product Route model binding
+     * @param  Product  $product  Route model binding
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, Product $product)
     {
         $data = $request->validate([
-            'name'          => ['required', 'string', 'max:255'],
-            'slug'          => ['nullable', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255'],
             'category_slug' => ['nullable', 'string', 'max:255'],
-            'gender'        => ['nullable', 'string', 'max:50'],
-            'brand'         => ['nullable', 'string', 'max:100'],
-            'section'       => ['nullable', 'string', 'max:100'],
-            'folder'        => ['nullable', 'string', 'max:255'],
-            'image'         => ['nullable', 'image', 'max:4096'],
+            'gender' => ['nullable', 'string', 'max:50'],
+            'brand' => ['nullable', 'string', 'max:100'],
+            'section' => ['nullable', 'string', 'max:100'],
+            'folder' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable', 'image', 'max:4096'],
         ]);
 
         // Auto-generate slug from name if not provided
@@ -181,7 +178,7 @@ class ProductController extends Controller
     /**
      * Delete a product and its associated image.
      *
-     * @param Product $product Route model binding
+     * @param  Product  $product  Route model binding
      * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Product $product)
@@ -200,7 +197,6 @@ class ProductController extends Controller
     /**
      * Delete multiple products at once.
      *
-     * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function bulkDestroy(Request $request)
@@ -222,6 +218,7 @@ class ProductController extends Controller
         }
 
         $count = count($ids);
+
         return redirect()->route('admin.products.index')
             ->with('status', "{$count} product(s) deleted.");
     }

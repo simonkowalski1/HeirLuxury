@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Cache;
-use Intervention\Image\Laravel\Facades\Image;
+use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Encoders\WebpEncoder;
+use Intervention\Image\Laravel\Facades\Image;
 
 /**
  * Service for generating and managing optimized WebP image thumbnails.
@@ -55,9 +55,9 @@ class ThumbnailService
      * - thumb: Navigation thumbnails in product gallery strip
      */
     public const SIZES = [
-        'card'    => ['width' => 400, 'height' => 300, 'quality' => 80],
+        'card' => ['width' => 400, 'height' => 300, 'quality' => 80],
         'gallery' => ['width' => 800, 'height' => 800, 'quality' => 85],
-        'thumb'   => ['width' => 96,  'height' => 96,  'quality' => 75],
+        'thumb' => ['width' => 96,  'height' => 96,  'quality' => 75],
     ];
 
     /** @var int Cache TTL for URL lookups in seconds (1 hour) */
@@ -79,17 +79,17 @@ class ThumbnailService
      * It automatically generates the thumbnail if it doesn't exist.
      * Uses caching to avoid repeated filesystem checks.
      *
-     * @param string $originalPath Relative path to original image (e.g., "imports/lv-bags-women/Product/0000.jpg")
-     * @param string $size Size key: 'card', 'gallery', or 'thumb'
+     * @param  string  $originalPath  Relative path to original image (e.g., "imports/lv-bags-women/Product/0000.jpg")
+     * @param  string  $size  Size key: 'card', 'gallery', or 'thumb'
      * @return string|null Public URL to thumbnail, or null if invalid size or missing original
      */
     public function getUrl(string $originalPath, string $size = 'card'): ?string
     {
-        if (!isset(self::SIZES[$size])) {
+        if (! isset(self::SIZES[$size])) {
             return null;
         }
 
-        $cacheKey = "thumbnail_url:{$size}:" . md5($originalPath);
+        $cacheKey = "thumbnail_url:{$size}:".md5($originalPath);
 
         return Cache::remember($cacheKey, self::URL_CACHE_TTL, function () use ($originalPath, $size) {
             $thumbnailPath = $this->getThumbnailPath($originalPath, $size);
@@ -120,13 +120,13 @@ class ThumbnailService
      * When multiple requests hit an uncached thumbnail simultaneously,
      * only one will generate it while others wait.
      *
-     * @param string $originalPath Relative path to original image
-     * @param string $size Size key: 'card', 'gallery', or 'thumb'
+     * @param  string  $originalPath  Relative path to original image
+     * @param  string  $size  Size key: 'card', 'gallery', or 'thumb'
      * @return bool True on success, false on failure or timeout
      */
     protected function generateWithLock(string $originalPath, string $size): bool
     {
-        $lockKey = "thumbnail_lock:{$size}:" . md5($originalPath);
+        $lockKey = "thumbnail_lock:{$size}:".md5($originalPath);
 
         return Cache::lock($lockKey, self::LOCK_TIMEOUT)->block(self::LOCK_TIMEOUT, function () use ($originalPath, $size) {
             // Double-check: another process may have generated it while we waited
@@ -144,19 +144,19 @@ class ThumbnailService
      * Creates a WebP thumbnail with cover crop (fills dimensions, crops overflow).
      * Thumbnails are stored in: thumbnails/{size}/{relative-path}.webp
      *
-     * @param string $originalPath Relative path to original image
-     * @param string $size Size key: 'card', 'gallery', or 'thumb'
+     * @param  string  $originalPath  Relative path to original image
+     * @param  string  $size  Size key: 'card', 'gallery', or 'thumb'
      * @return bool True on success, false on failure
      */
     public function generate(string $originalPath, string $size = 'card'): bool
     {
-        if (!isset(self::SIZES[$size])) {
+        if (! isset(self::SIZES[$size])) {
             return false;
         }
 
         $storage = Storage::disk($this->disk);
 
-        if (!$storage->exists($originalPath)) {
+        if (! $storage->exists($originalPath)) {
             return false;
         }
 
@@ -186,6 +186,7 @@ class ThumbnailService
         } catch (\Throwable $e) {
             // Log the error but don't crash - views will fall back to original
             report($e);
+
             return false;
         }
     }
@@ -196,7 +197,7 @@ class ThumbnailService
      * Loads and decodes the image once, then resizes for each size.
      * More efficient than calling generate() three times.
      *
-     * @param string $originalPath Relative path to original image
+     * @param  string  $originalPath  Relative path to original image
      * @return array<string, bool> Results keyed by size name
      */
     public function generateAll(string $originalPath): array
@@ -204,10 +205,11 @@ class ThumbnailService
         $storage = Storage::disk($this->disk);
         $results = [];
 
-        if (!$storage->exists($originalPath)) {
+        if (! $storage->exists($originalPath)) {
             foreach (array_keys(self::SIZES) as $size) {
                 $results[$size] = false;
             }
+
             return $results;
         }
 
@@ -262,8 +264,8 @@ class ThumbnailService
      *   Input:  imports/lv-bags-women/LV 0001/0000.jpg
      *   Output: thumbnails/card/lv-bags-women/LV 0001/0000.webp
      *
-     * @param string $originalPath Relative path to original image
-     * @param string $size Size key for thumbnail
+     * @param  string  $originalPath  Relative path to original image
+     * @param  string  $size  Size key for thumbnail
      * @return string Relative path to thumbnail
      */
     public function getThumbnailPath(string $originalPath, string $size): string
@@ -276,7 +278,7 @@ class ThumbnailService
             $webpPath = preg_replace('/\.(jpe?g|png|gif|webp|bmp|tiff?)$/i', '.webp', $relativePath);
         } else {
             // No recognized extension - append .webp
-            $webpPath = $relativePath . '.webp';
+            $webpPath = $relativePath.'.webp';
         }
 
         return "{$this->thumbnailDir}/{$size}/{$webpPath}";
@@ -285,13 +287,14 @@ class ThumbnailService
     /**
      * Check if a thumbnail exists for the given image and size.
      *
-     * @param string $originalPath Relative path to original image
-     * @param string $size Size key: 'card', 'gallery', or 'thumb'
+     * @param  string  $originalPath  Relative path to original image
+     * @param  string  $size  Size key: 'card', 'gallery', or 'thumb'
      * @return bool True if thumbnail exists
      */
     public function exists(string $originalPath, string $size = 'card'): bool
     {
         $thumbnailPath = $this->getThumbnailPath($originalPath, $size);
+
         return Storage::disk($this->disk)->exists($thumbnailPath);
     }
 
@@ -303,8 +306,8 @@ class ThumbnailService
      * - thumb: Small thumbnail for navigation strip
      * - original: Full-size image for lightbox/zoom
      *
-     * @param string $basePath Base directory path (e.g., "imports/lv-bags-women/Product")
-     * @param array $files Array of filenames in the directory
+     * @param  string  $basePath  Base directory path (e.g., "imports/lv-bags-women/Product")
+     * @param  array  $files  Array of filenames in the directory
      * @return array<int, array{src: string, thumb: string, original: string, alt: string}>
      */
     public function getGalleryImages(string $basePath, array $files): array
@@ -313,13 +316,13 @@ class ThumbnailService
         $images = [];
 
         foreach ($files as $file) {
-            $originalPath = $basePath . '/' . basename($file);
+            $originalPath = $basePath.'/'.basename($file);
 
             $images[] = [
-                'src'      => $this->getUrl($originalPath, 'gallery') ?? $storage->url($originalPath),
-                'thumb'    => $this->getUrl($originalPath, 'thumb') ?? $storage->url($originalPath),
+                'src' => $this->getUrl($originalPath, 'gallery') ?? $storage->url($originalPath),
+                'thumb' => $this->getUrl($originalPath, 'thumb') ?? $storage->url($originalPath),
                 'original' => $storage->url($originalPath),
-                'alt'      => pathinfo($file, PATHINFO_FILENAME),
+                'alt' => pathinfo($file, PATHINFO_FILENAME),
             ];
         }
 
@@ -331,7 +334,7 @@ class ThumbnailService
      *
      * Convenience method for product card components.
      *
-     * @param string $originalPath Relative path to original image
+     * @param  string  $originalPath  Relative path to original image
      * @return string URL to card thumbnail or original
      */
     public function getCardUrl(string $originalPath): string
@@ -348,12 +351,12 @@ class ThumbnailService
      * Call this when an original image is updated or deleted,
      * or when thumbnails are regenerated.
      *
-     * @param string $originalPath Relative path to original image
+     * @param  string  $originalPath  Relative path to original image
      */
     public function clearCache(string $originalPath): void
     {
         foreach (array_keys(self::SIZES) as $size) {
-            Cache::forget("thumbnail_url:{$size}:" . md5($originalPath));
+            Cache::forget("thumbnail_url:{$size}:".md5($originalPath));
         }
     }
 
@@ -362,7 +365,7 @@ class ThumbnailService
      *
      * Call this when an original image is deleted.
      *
-     * @param string $originalPath Relative path to original image
+     * @param  string  $originalPath  Relative path to original image
      */
     public function deleteThumbnails(string $originalPath): void
     {

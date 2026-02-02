@@ -50,7 +50,7 @@ class GenerateThumbnails extends Command
      * 3. For each image, generate requested thumbnail sizes
      * 4. Track and report success/skip/failure counts
      *
-     * @param ThumbnailService $thumbnailService Injected thumbnail service
+     * @param  ThumbnailService  $thumbnailService  Injected thumbnail service
      * @return int Command::SUCCESS or Command::FAILURE
      */
     public function handle(ThumbnailService $thumbnailService): int
@@ -67,7 +67,7 @@ class GenerateThumbnails extends Command
             $folders = [$folder];
         } else {
             $folders = collect($storage->directories($basePath))
-                ->map(fn($path) => basename($path))
+                ->map(fn ($path) => basename($path))
                 ->filter()
                 ->values()
                 ->all();
@@ -75,10 +75,11 @@ class GenerateThumbnails extends Command
 
         if (empty($folders)) {
             $this->error('No import folders found.');
+
             return Command::FAILURE;
         }
 
-        $this->info("Processing folders: " . implode(', ', $folders));
+        $this->info('Processing folders: '.implode(', ', $folders));
         $this->newLine();
 
         // Resolve which sizes to generate
@@ -90,8 +91,9 @@ class GenerateThumbnails extends Command
         foreach ($folders as $folderName) {
             $folderPath = "{$basePath}/{$folderName}";
 
-            if (!$storage->exists($folderPath)) {
+            if (! $storage->exists($folderPath)) {
                 $this->warn("Folder not found: {$folderPath}");
+
                 continue;
             }
 
@@ -106,14 +108,15 @@ class GenerateThumbnails extends Command
             foreach ($productDirs as $productDir) {
                 // Collect all image files (jpg, jpeg, png, webp)
                 $files = collect($storage->allFiles($productDir))
-                    ->filter(fn($path) => preg_match('/\.(jpe?g|png|webp)$/i', $path))
+                    ->filter(fn ($path) => preg_match('/\.(jpe?g|png|webp)$/i', $path))
                     ->values();
 
                 foreach ($files as $imagePath) {
                     foreach ($sizes as $sizeKey) {
                         // Skip existing thumbnails unless --force is used
-                        if (!$force && $thumbnailService->exists($imagePath, $sizeKey)) {
+                        if (! $force && $thumbnailService->exists($imagePath, $sizeKey)) {
                             $totalSkipped++;
+
                             continue;
                         }
 
@@ -136,7 +139,7 @@ class GenerateThumbnails extends Command
         }
 
         // Display summary table
-        $this->info("Thumbnail generation complete!");
+        $this->info('Thumbnail generation complete!');
         $this->table(
             ['Metric', 'Count'],
             [

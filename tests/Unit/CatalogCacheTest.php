@@ -23,7 +23,7 @@ class CatalogCacheTest extends TestCase
         parent::setUp();
         // Use array driver for tests to avoid database dependency
         config(['cache.default' => 'array']);
-        $this->cache = new CatalogCache();
+        $this->cache = new CatalogCache;
         Cache::flush();
     }
 
@@ -81,13 +81,14 @@ class CatalogCacheTest extends TestCase
     {
         $data = ['ids' => [1, 2, 3], 'total' => 3];
 
-        $result = $this->cache->remember('hash', 1, fn() => $data);
+        $result = $this->cache->remember('hash', 1, fn () => $data);
         $this->assertEquals($data, $result);
 
         // Second call should return cached data
         $callCount = 0;
         $result2 = $this->cache->remember('hash', 1, function () use (&$callCount) {
             $callCount++;
+
             return ['different' => 'data'];
         });
 
@@ -100,11 +101,11 @@ class CatalogCacheTest extends TestCase
      */
     public function test_invalidation_causes_fresh_fetch(): void
     {
-        $this->cache->remember('hash', 1, fn() => ['version' => 1]);
+        $this->cache->remember('hash', 1, fn () => ['version' => 1]);
 
         $this->cache->invalidate();
 
-        $result = $this->cache->remember('hash', 1, fn() => ['version' => 2]);
+        $result = $this->cache->remember('hash', 1, fn () => ['version' => 2]);
         $this->assertEquals(['version' => 2], $result);
     }
 

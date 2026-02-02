@@ -13,6 +13,7 @@ class DashboardTest extends TestCase
     use RefreshDatabase;
 
     protected User $admin;
+
     protected User $user;
 
     protected function setUp(): void

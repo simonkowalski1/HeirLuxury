@@ -20,13 +20,14 @@ class DeduplicateImages extends Command
         $minSize = (int) $this->option('min-size');
         $specificPath = $this->option('path');
 
-        if (!is_dir($base)) {
+        if (! is_dir($base)) {
             $this->error("Imports folder not found: $base");
+
             return Command::FAILURE;
         }
 
         $this->info($dryRun ? '🔍 DRY RUN MODE - No files will be deleted' : '🗑️  DELETE MODE - Files will be permanently removed');
-        $this->info("Minimum file size threshold: " . number_format($minSize / 1024, 1) . " KB");
+        $this->info('Minimum file size threshold: '.number_format($minSize / 1024, 1).' KB');
         $this->newLine();
 
         $totalDeleted = 0;
@@ -61,7 +62,7 @@ class DeduplicateImages extends Command
             $totalDeleted += $brandDeleted;
             $totalKept += $brandKept;
 
-            $this->line("   ✔ Kept: $brandKept | " . ($dryRun ? 'Would delete' : 'Deleted') . ": $brandDeleted");
+            $this->line("   ✔ Kept: $brandKept | ".($dryRun ? 'Would delete' : 'Deleted').": $brandDeleted");
         }
 
         $this->newLine();
@@ -69,8 +70,8 @@ class DeduplicateImages extends Command
         $this->info($dryRun ? '📋 DRY RUN SUMMARY' : '📋 DELETION SUMMARY');
         $this->info('═══════════════════════════════════════════════════════');
         $this->line("   Images kept:    $totalKept");
-        $this->line("   Images " . ($dryRun ? 'to delete' : 'deleted') . ": $totalDeleted");
-        $this->line("   Space " . ($dryRun ? 'to save' : 'saved') . ":   " . $this->formatBytes($totalSpaceSaved));
+        $this->line('   Images '.($dryRun ? 'to delete' : 'deleted').": $totalDeleted");
+        $this->line('   Space '.($dryRun ? 'to save' : 'saved').':   '.$this->formatBytes($totalSpaceSaved));
         $this->newLine();
 
         // Show sample of files to be deleted in dry-run mode
@@ -79,11 +80,11 @@ class DeduplicateImages extends Command
             $this->newLine();
 
             foreach (array_slice($deletedFiles, 0, 20) as $file) {
-                $this->line("   🗑️  " . $file['path'] . " (" . $this->formatBytes($file['size']) . ")");
+                $this->line('   🗑️  '.$file['path'].' ('.$this->formatBytes($file['size']).')');
             }
 
             if (count($deletedFiles) > 20) {
-                $this->line("   ... and " . (count($deletedFiles) - 20) . " more files");
+                $this->line('   ... and '.(count($deletedFiles) - 20).' more files');
             }
 
             $this->newLine();
@@ -97,10 +98,12 @@ class DeduplicateImages extends Command
     {
         if ($specificPath) {
             $fullPath = "$base/$specificPath";
-            if (!is_dir($fullPath)) {
+            if (! is_dir($fullPath)) {
                 $this->error("Specified path not found: $specificPath");
+
                 return [];
             }
+
             return [$specificPath];
         }
 
@@ -143,7 +146,7 @@ class DeduplicateImages extends Command
                     'size' => $fileSize,
                 ];
 
-                if (!$dryRun) {
+                if (! $dryRun) {
                     unlink($filePath);
                 }
             } else {
@@ -157,12 +160,13 @@ class DeduplicateImages extends Command
     protected function formatBytes(int $bytes): string
     {
         if ($bytes >= 1073741824) {
-            return number_format($bytes / 1073741824, 2) . ' GB';
+            return number_format($bytes / 1073741824, 2).' GB';
         } elseif ($bytes >= 1048576) {
-            return number_format($bytes / 1048576, 2) . ' MB';
+            return number_format($bytes / 1048576, 2).' MB';
         } elseif ($bytes >= 1024) {
-            return number_format($bytes / 1024, 2) . ' KB';
+            return number_format($bytes / 1024, 2).' KB';
         }
-        return $bytes . ' bytes';
+
+        return $bytes.' bytes';
     }
 }

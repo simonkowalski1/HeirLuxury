@@ -2,12 +2,9 @@
 
 namespace Tests\Unit;
 
-use App\Models\Product;
 use App\Services\CatalogCache;
 use App\Services\ThumbnailService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
@@ -71,7 +68,7 @@ class PerformanceTest extends TestCase
      */
     public function test_catalog_cache_generates_versioned_keys(): void
     {
-        $cache = new CatalogCache();
+        $cache = new CatalogCache;
 
         $key1 = $cache->key('test-hash', 1);
         $key2 = $cache->key('test-hash', 2);
@@ -92,7 +89,7 @@ class PerformanceTest extends TestCase
      */
     public function test_catalog_cache_invalidation_changes_version(): void
     {
-        $cache = new CatalogCache();
+        $cache = new CatalogCache;
 
         $versionBefore = $cache->getVersion();
         $keyBefore = $cache->key('test', 1);
@@ -111,11 +108,12 @@ class PerformanceTest extends TestCase
      */
     public function test_catalog_cache_remember_caches_data(): void
     {
-        $cache = new CatalogCache();
+        $cache = new CatalogCache;
         $callCount = 0;
 
         $callback = function () use (&$callCount) {
             $callCount++;
+
             return ['ids' => [1, 2, 3], 'total' => 3, 'per_page' => 24, 'last_page' => 1];
         };
 
@@ -135,7 +133,7 @@ class PerformanceTest extends TestCase
      */
     public function test_thumbnail_service_generates_correct_paths(): void
     {
-        $service = new ThumbnailService();
+        $service = new ThumbnailService;
 
         // Test path generation for different sizes
         $cardPath = $service->getThumbnailPath('imports/lv-bags-women/Test Product/0000.jpg', 'card');
@@ -157,7 +155,7 @@ class PerformanceTest extends TestCase
      */
     public function test_thumbnail_service_handles_extensions(): void
     {
-        $service = new ThumbnailService();
+        $service = new ThumbnailService;
 
         $jpgPath = $service->getThumbnailPath('test/image.jpg', 'card');
         $pngPath = $service->getThumbnailPath('test/image.png', 'card');
@@ -174,7 +172,7 @@ class PerformanceTest extends TestCase
      */
     public function test_thumbnail_service_returns_null_for_invalid_size(): void
     {
-        $service = new ThumbnailService();
+        $service = new ThumbnailService;
 
         $result = $service->getUrl('test/image.jpg', 'invalid_size');
 
@@ -198,7 +196,7 @@ class PerformanceTest extends TestCase
             (object) ['id' => 9],
         ]);
 
-        $sorted = $items->sortBy(fn($p) => $idOrder[$p->id] ?? PHP_INT_MAX)->values();
+        $sorted = $items->sortBy(fn ($p) => $idOrder[$p->id] ?? PHP_INT_MAX)->values();
 
         $sortedIds = $sorted->pluck('id')->all();
 
@@ -210,7 +208,7 @@ class PerformanceTest extends TestCase
      */
     public function test_catalog_cache_ttl_is_reasonable(): void
     {
-        $cache = new CatalogCache();
+        $cache = new CatalogCache;
 
         $ttl = $cache->getTtl();
 

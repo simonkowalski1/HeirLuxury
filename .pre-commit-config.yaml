@@ -1,0 +1,43 @@
+# ABOUTME: Pre-commit hook configuration for HeirLuxury.
+# ABOUTME: Runs Pint, ESLint, Prettier, and PHPUnit before every commit.
+repos:
+  # PHP: Laravel Pint (formatting + linting)
+  - repo: local
+    hooks:
+      - id: laravel-pint
+        name: Laravel Pint
+        entry: ./vendor/bin/pint --test
+        language: system
+        files: \.php$
+        pass_filenames: false
+
+  # JS: ESLint
+  - repo: local
+    hooks:
+      - id: eslint
+        name: ESLint
+        entry: npx eslint
+        language: system
+        files: \.(js|mjs)$
+        pass_filenames: true
+
+  # JS/CSS/JSON: Prettier
+  - repo: local
+    hooks:
+      - id: prettier
+        name: Prettier
+        entry: npx prettier --check
+        language: system
+        files: \.(js|css|json)$
+        pass_filenames: true
+
+  # PHP: PHPUnit
+  - repo: local
+    hooks:
+      - id: phpunit
+        name: PHPUnit Tests
+        entry: php artisan test
+        language: system
+        files: \.php$
+        pass_filenames: false
+        stages: [pre-commit]

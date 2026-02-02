@@ -32,8 +32,6 @@ class CatalogCache
 
     /**
      * Get the current cache version.
-     *
-     * @return int
      */
     public function getVersion(): int
     {
@@ -43,13 +41,13 @@ class CatalogCache
     /**
      * Build a versioned cache key.
      *
-     * @param string $slugsHash MD5 hash of category slugs (or 'all')
-     * @param int $page Page number
-     * @return string
+     * @param  string  $slugsHash  MD5 hash of category slugs (or 'all')
+     * @param  int  $page  Page number
      */
     public function key(string $slugsHash, int $page): string
     {
         $version = $this->getVersion();
+
         return "catalog:v{$version}:{$slugsHash}:page{$page}";
     }
 
@@ -58,9 +56,9 @@ class CatalogCache
      *
      * Caches only ID arrays (not full models) to reduce memory/serialization.
      *
-     * @param string $slugsHash MD5 hash of category slugs (or 'all')
-     * @param int $page Page number
-     * @param callable $callback Returns array of product IDs
+     * @param  string  $slugsHash  MD5 hash of category slugs (or 'all')
+     * @param  int  $page  Page number
+     * @param  callable  $callback  Returns array of product IDs
      * @return array{ids: array<int>, total: int, per_page: int, last_page: int}
      */
     public function remember(string $slugsHash, int $page, callable $callback): array
@@ -84,8 +82,6 @@ class CatalogCache
 
     /**
      * Get the cache TTL in seconds.
-     *
-     * @return int
      */
     public function getTtl(): int
     {

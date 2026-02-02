@@ -4,9 +4,10 @@ namespace App\Providers;
 
 use App\Models\Product;
 use App\Observers\ProductObserver;
+use App\Support\Breadcrumbs;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use App\Support\Breadcrumbs;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,11 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register model observers for cache invalidation
         Product::observe(ProductObserver::class);
+
+        // Set default locale for URL generation so route('home') works
+        // even outside locale-prefixed routes (e.g. admin, profile pages).
+        // The SetLocale middleware overrides this for locale-prefixed routes.
+        URL::defaults(['locale' => 'en']);
 
         View::composer('*', function ($view) {
             $data = $view->getData();

@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Product;
+use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 
 /**
@@ -39,12 +39,12 @@ class BackfillProductSlugs extends Command
      */
     public function handle(): int
     {
-        $this->info("Starting slug backfill...");
+        $this->info('Starting slug backfill...');
 
         Product::chunk(200, function ($products) {
             foreach ($products as $p) {
                 // Generate unique slug using name + ID
-                $slug = Str::slug($p->name . '-' . $p->id);
+                $slug = Str::slug($p->name.'-'.$p->id);
 
                 $p->slug = $slug;
                 $p->save();
@@ -53,7 +53,8 @@ class BackfillProductSlugs extends Command
             }
         });
 
-        $this->info("Slug backfill complete!");
+        $this->info('Slug backfill complete!');
+
         return self::SUCCESS;
     }
 }

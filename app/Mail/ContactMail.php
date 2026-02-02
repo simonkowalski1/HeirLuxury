@@ -20,12 +20,12 @@ class ContactMail extends Mailable
     public function envelope(): Envelope
     {
         $subject = $this->data['product_name']
-            ? 'Product Inquiry: ' . $this->data['product_name']
+            ? 'Product Inquiry: '.$this->data['product_name']
             : 'Contact Form Submission';
 
         return new Envelope(
-            from: new Address($this->data['email'], $this->data['first_name'] . ' ' . $this->data['last_name']),
-            replyTo: [new Address($this->data['email'], $this->data['first_name'] . ' ' . $this->data['last_name'])],
+            from: new Address($this->data['email'], $this->data['first_name'].' '.$this->data['last_name']),
+            replyTo: [new Address($this->data['email'], $this->data['first_name'].' '.$this->data['last_name'])],
             subject: $subject,
         );
     }

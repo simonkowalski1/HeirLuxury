@@ -23,7 +23,7 @@ class CategoryResolverTest extends TestCase
         parent::setUp();
         // Use array driver for tests to avoid database dependency
         config(['cache.default' => 'array']);
-        $this->resolver = new CategoryResolver();
+        $this->resolver = new CategoryResolver;
         Cache::flush();
     }
 
