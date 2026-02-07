@@ -10,6 +10,38 @@
         ?? collect(config('categories.men') ?? []);
 
     $locale = app()->getLocale();
+
+    // Helper to translate section labels (bags, shoes, clothes) but not brand names
+    $translateSection = function($label) use ($locale) {
+        $key = 'messages.' . strtolower($label);
+        $translated = __($key, [], $locale);
+        return $translated !== $key ? $translated : $label;
+    };
+
+    // Helper to translate item names (e.g., "Louis Vuitton Bags" → "Louis Vuitton Torby")
+    // Translates category words (Bags, Shoes, Clothing, etc.) and gender (Women, Men) but keeps brand names
+    $translateItemName = function($name) use ($locale) {
+        $translations = [
+            'Bags' => __('messages.bags', [], $locale),
+            'Shoes' => __('messages.shoes', [], $locale),
+            'Clothing' => __('messages.clothing', [], $locale),
+            'Belts' => __('messages.belts', [], $locale),
+            'Glasses' => __('messages.glasses', [], $locale),
+            'Jewelry' => __('messages.jewelry', [], $locale),
+            'Watches' => __('messages.watches', [], $locale),
+            'Women' => __('messages.women', [], $locale),
+            'Men' => __('messages.men', [], $locale),
+        ];
+
+        $result = $name;
+        foreach ($translations as $english => $translated) {
+            // Only replace if translation exists (not returning the key)
+            if ($translated !== 'messages.' . strtolower($english)) {
+                $result = str_replace($english, $translated, $result);
+            }
+        }
+        return $result;
+    };
 @endphp
 
 
@@ -21,7 +53,7 @@
             @click="gender = 'women'"
             :class="gender === 'women' ? 'is-active' : ''"
         >
-            Women
+            {{ __('messages.women') }}
         </button>
 
         <button
@@ -29,7 +61,7 @@
             @click="gender = 'men'"
             :class="gender === 'men' ? 'is-active' : ''"
         >
-            Men
+            {{ __('messages.men') }}
         </button>
     </div>
 
@@ -42,7 +74,7 @@
         @foreach ($womenSections as $sectionLabel => $items)
             <section class="mega-col">
                 <h3 class="mega-col-title">
-                    {{ strtoupper($sectionLabel) }}
+                    {{ strtoupper($translateSection($sectionLabel)) }}
                 </h3>
 
                 <ul class="mega-list">
@@ -77,7 +109,7 @@
 
                         <li>
                             <a href="{{ $url }}">
-                                {{ $item['label'] ?? $item['name'] ?? 'Unnamed' }}
+                                {{ $translateItemName($item['label'] ?? $item['name'] ?? 'Unnamed') }}
                             </a>
                         </li>
                     @endforeach
@@ -96,7 +128,7 @@
         @foreach ($menSections as $sectionLabel => $items)
             <section class="mega-col">
                 <h3 class="mega-col-title">
-                    {{ strtoupper($sectionLabel) }}
+                    {{ strtoupper($translateSection($sectionLabel)) }}
                 </h3>
 
                 <ul class="mega-list">
@@ -131,7 +163,7 @@
 
                         <li>
                             <a href="{{ $url }}">
-                                {{ $item['label'] ?? $item['name'] ?? 'Unnamed' }}
+                                {{ $translateItemName($item['label'] ?? $item['name'] ?? 'Unnamed') }}
                             </a>
                         </li>
                     @endforeach

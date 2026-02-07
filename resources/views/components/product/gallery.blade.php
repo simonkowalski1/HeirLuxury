@@ -15,11 +15,10 @@
         x-data="{
             idx: 0,
             images: @js($images),
-            heroLoaded: false,
             lightbox: false,
-            setIndex(i) { this.idx = i; this.heroLoaded = false; },
-            prev() { this.idx = (this.idx - 1 + this.images.length) % this.images.length; this.heroLoaded = false; },
-            next() { this.idx = (this.idx + 1) % this.images.length; this.heroLoaded = false; },
+            setIndex(i) { this.idx = i; },
+            prev() { this.idx = (this.idx - 1 + this.images.length) % this.images.length; },
+            next() { this.idx = (this.idx + 1) % this.images.length; }
         }"
     >
         {{-- Thumbnails - uses optimized thumb size --}}
@@ -58,13 +57,12 @@
                 class="block w-full h-full rounded-2xl overflow-hidden border border-white/10 bg-black/40 cursor-zoom-in"
             >
                 <img
+                    x-ref="heroImg"
                     :src="images[idx]?.src"
                     :alt="images[idx]?.alt || 'Product image'"
                     width="800"
                     height="800"
-                    class="w-full h-full object-cover transition-opacity duration-300"
-                    :class="heroLoaded ? 'opacity-100' : 'opacity-0'"
-                    @load="heroLoaded = true"
+                    class="w-full h-full object-cover"
                     decoding="async"
                 >
             </button>
@@ -120,30 +118,12 @@
                 @keydown.left.window="if(lightbox) prev()"
                 @keydown.right.window="if(lightbox) next()"
                 class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 cursor-zoom-out"
-                x-data="{ lightboxLoaded: false }"
-                x-init="$watch('lightbox', value => { if(value) lightboxLoaded = false })"
             >
-                {{-- Loading spinner --}}
-                <div
-                    x-show="!lightboxLoaded"
-                    class="absolute inset-0 flex items-center justify-center"
-                >
-                    <svg class="animate-spin h-10 w-10 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                </div>
-
                 {{-- Lightbox image --}}
                 <img
-                    x-show="lightboxLoaded"
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0 scale-95"
-                    x-transition:enter-end="opacity-100 scale-100"
                     :src="images[idx]?.original || images[idx]?.src"
                     :alt="images[idx]?.alt || 'Product image'"
                     class="max-w-full max-h-full object-contain"
-                    @load="lightboxLoaded = true"
                     @click.stop
                 >
 
@@ -166,7 +146,7 @@
                     <div>
                         <button
                             type="button"
-                            @click.stop="prev(); lightboxLoaded = false"
+                            @click.stop="prev()"
                             class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/60
                                    border border-white/20 text-white flex items-center justify-center
                                    hover:bg-amber-400 hover:text-black hover:border-amber-400 transition"
@@ -178,7 +158,7 @@
                         </button>
                         <button
                             type="button"
-                            @click.stop="next(); lightboxLoaded = false"
+                            @click.stop="next()"
                             class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/60
                                    border border-white/20 text-white flex items-center justify-center
                                    hover:bg-amber-400 hover:text-black hover:border-amber-400 transition"

@@ -7,6 +7,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'HeirLuxury')</title>
 
+    {{-- Favicon --}}
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/favicon-180x180.png">
+
     {{-- Tailwind + app.js via Vite (Breeze style) --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 

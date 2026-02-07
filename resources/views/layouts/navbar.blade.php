@@ -24,7 +24,7 @@
     class="catalog-toggle"
 >
     <span class="catalog-line"></span>
-    <span class="catalog-label">Catalog</span>
+    <span class="catalog-label">{{ __('messages.catalog') }}</span>
     <span class="catalog-line"></span>
 </button>
 
@@ -73,7 +73,7 @@
                 onclick="window.dispatchEvent(new Event('open-contact-modal'))"
                 class="btn-gold text-[11px] px-3 py-1.5"
             >
-                Contact
+                {{ __('messages.contact') }}
             </button>
 
             <button
@@ -175,7 +175,7 @@
                     @click="gender = 'women'"
                     :class="['mega-gender', gender === 'women' ? 'active' : '']"
                 >
-                    Women
+                    {{ __('messages.women') }}
                 </button>
 
                 <button
@@ -183,7 +183,7 @@
                     @click="gender = 'men'"
                     :class="['mega-gender', gender === 'men' ? 'active' : '']"
                 >
-                    Men
+                    {{ __('messages.men') }}
                 </button>
             </div>
 

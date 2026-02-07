@@ -4,6 +4,7 @@ HeirLuxury (root)
 ¦   ¦   +-- Commands
 ¦   ¦   ¦   +-- BackfillProductSlugs.php
 ¦   ¦   ¦   +-- BackfillSlugs.php
+¦   ¦   ¦   +-- DeduplicateImages.php
 ¦   ¦   ¦   +-- GenerateThumbnails.php
 ¦   ¦   ¦   +-- ImportBrands.php
 ¦   ¦   ¦   +-- ImportLV.php
@@ -35,6 +36,7 @@ HeirLuxury (root)
 ¦   ¦   +-- Middleware
 ¦   ¦   ¦   +-- AdminMiddleware.php
 ¦   ¦   ¦   +-- SecurityHeaders.php
+¦   ¦   ¦   +-- SetLocale.php
 ¦   ¦   ¦   +-- TrustHosts.php
 ¦   ¦   +-- Requests
 ¦   ¦   ¦   +-- Auth
@@ -101,6 +103,11 @@ HeirLuxury (root)
 ¦   ¦   +-- DatabaseSeeder.php
 ¦   +-- .gitignore
 ¦   +-- database.sqlite
++-- lang
+¦   +-- en
+¦   ¦   +-- messages.php
+¦   +-- pl
+¦       +-- messages.php
 +-- public
 ¦   +-- assets
 ¦   +-- icons
@@ -108,6 +115,8 @@ HeirLuxury (root)
 ¦   ¦   +-- aaaaaaaaaaaplaceholder-4x3.png
 ¦   ¦   +-- images.json
 ¦   +-- img
+¦   ¦   +-- hl-logo-loading.png
+¦   ¦   +-- hl-logo-panel.png
 ¦   ¦   +-- telegram.png
 ¦   +-- storage
 ¦   +-- .htaccess
@@ -170,6 +179,7 @@ HeirLuxury (root)
 ¦       ¦   +-- input-error.blade.php
 ¦       ¦   +-- input-label.blade.php
 ¦       ¦   +-- inquiry-modal.blade.php
+¦       ¦   +-- loading-screen.blade.php
 ¦       ¦   +-- modal.blade.php
 ¦       ¦   +-- nav-link.blade.php
 ¦       ¦   +-- primary-button.blade.php

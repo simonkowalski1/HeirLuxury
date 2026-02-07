@@ -41,6 +41,7 @@ return [
     'bags' => 'Bags',
     'shoes' => 'Shoes',
     'clothes' => 'Clothes',
+    'clothing' => 'Clothing',
     'belts' => 'Belts',
     'glasses' => 'Glasses',
     'jewelry' => 'Jewelry',

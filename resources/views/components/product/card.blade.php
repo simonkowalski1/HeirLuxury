@@ -33,56 +33,55 @@
     }
 
     // === Thumbnail image resolution ===
-    // Map category_slug -> base import folder
-    $baseFolder = match ($categorySlug) {
-        // Louis Vuitton
-        'louis-vuitton-women-bags'    => 'lv-bags-women',
-        'louis-vuitton-women-shoes'   => 'lv-shoes-women',
-        'louis-vuitton-women-clothes' => 'lv-clothes-women',
-        'louis-vuitton-men-bags'      => 'lv-bags-men',
-        'louis-vuitton-men-shoes'     => 'lv-shoes-men',
-        'louis-vuitton-men-clothes'   => 'lv-clothes-men',
-        'louis-vuitton-women-belts'   => 'lv-belts-women',
-        'louis-vuitton-women-glasses' => 'lv-glasses-women',
-        'louis-vuitton-women-jewelry' => 'lv-jewelry-women',
-        
-        // Chanel
-        'chanel-women-bags'           => 'chanel-bags-women',
-        'chanel-women-shoes'          => 'chanel-shoes-women',
-        'chanel-women-clothes'        => 'chanel-clothes-women',
-        'chanel-men-shoes'            => 'chanel-shoes-men',
-        'chanel-men-clothes'          => 'chanel-clothes-men',
-        'chanel-women-belts'          => 'chanel-belts-women',
-        'chanel-women-glasses'        => 'chanel-glasses-women',
-        'chanel-women-jewelry'        => 'chanel-jewelry-women',
-        
-        // Dior
-        'dior-women-bags'             => 'dior-bags-women',
-        'dior-women-shoes'            => 'dior-shoes-women',
-        'dior-women-clothes'          => 'dior-clothes-women',
-        'dior-men-shoes'              => 'dior-shoes-men',
-        'dior-men-clothes'            => 'dior-clothes-men',
-        
-        // Hermès
-        'hermes-women-bags'           => 'hermes-bags-women',
-        'hermes-women-shoes'          => 'hermes-shoes-women',
-        'hermes-women-clothes'        => 'hermes-clothes-women',
-        'hermes-men-shoes'            => 'hermes-shoes-men',
-        'hermes-men-clothes'          => 'hermes-clothes-men',
-        'hermes-women-belts'          => 'hermes-belts-women',
-        'hermes-women-glasses'        => 'hermes-glasses-women',
-        'hermes-women-jewelry'        => 'hermes-jewelry-women',
-        
-        default => null,
-    };
+    // Dynamically resolve category_slug ({brand}-{gender}-{section}) to storage folder ({prefix}-{section}-{gender})
+    $baseFolder = null;
+    $brandPrefixes = [
+        'louis-vuitton' => 'lv',
+        'chanel'        => 'chanel',
+        'dior'          => 'dior',
+        'hermes'        => 'hermes',
+        'celine'        => 'celine',
+        'givenchy'      => 'givenchy',
+        'mcqueen'       => 'mcqueen',
+        'moncler'       => 'moncler',
+        'nike'          => 'nike',
+        'offwhite'      => 'offwhite',
+        'versace'       => 'versace',
+        'yeezy'         => 'yeezy',
+    ];
+
+    if ($categorySlug) {
+        foreach ($brandPrefixes as $brand => $prefix) {
+            if (str_starts_with($categorySlug, "{$brand}-")) {
+                $rest = substr($categorySlug, strlen("{$brand}-"));
+                if (preg_match('/^(women|men)-(.+)$/', $rest, $matches)) {
+                    $gender = $matches[1];
+                    $section = $matches[2];
+                    $baseFolder = "{$prefix}-{$section}-{$gender}";
+                    break;
+                }
+            }
+        }
+    }
 
     $folder    = $val('folder');
     $imageName = $val('image');
 
-    // 1) Prefer stored image_path
-    $imagePath = $val('image_path');
+    // 1) Prefer cover.jpg (scraped thumbnail) if it exists
+    $imagePath = null;
+    if ($baseFolder && $folder) {
+        $coverPath = "imports/{$baseFolder}/{$folder}/cover.jpg";
+        if (Storage::disk('public')->exists($coverPath)) {
+            $imagePath = $coverPath;
+        }
+    }
 
-    // 2) If empty, build from baseFolder + folder + image
+    // 2) Fall back to stored image_path
+    if (! $imagePath) {
+        $imagePath = $val('image_path');
+    }
+
+    // 3) If still empty, build from baseFolder + folder + image
     if (! $imagePath && $baseFolder && $folder) {
         $filename  = $imageName ?: '0000.jpg';
         $imagePath = "imports/{$baseFolder}/{$folder}/{$filename}";
@@ -126,29 +125,9 @@
     </div>
 
     {{-- Text --}}
-    <div class="px-5 py-4 flex flex-col gap-1">
-        <div class="flex items-center justify-between gap-2">
-            <p class="text-sm font-semibold text-white tracking-wide">
-                {{ $name }}
-            </p>
-
-            <span class="inline-flex items-center justify-center rounded-full border border-white/15
-                         w-7 h-7 text-[11px] text-white/70
-                         group-hover:border-amber-400 group-hover:text-amber-300 transition">
-                <span class="sr-only">View details</span>
-                ›
-            </span>
-        </div>
-
-        @if ($catName)
-            <p class="text-xs text-white/50">
-                {{ $catName }}
-            </p>
-        @endif
-
-        <p class="mt-2 text-[11px] text-amber-300/80 group-hover:text-amber-200 flex items-center gap-1">
-            <span>View details</span>
-            <span aria-hidden="true">›</span>
+    <div class="px-5 py-4">
+        <p class="text-sm font-semibold text-white tracking-wide text-center">
+            {{ $name }}
         </p>
     </div>
 </a>

@@ -41,6 +41,7 @@ return [
     'bags' => 'Torby',
     'shoes' => 'Buty',
     'clothes' => 'Odzież',
+    'clothing' => 'Odzież',
     'belts' => 'Paski',
     'glasses' => 'Okulary',
     'jewelry' => 'Biżuteria',
