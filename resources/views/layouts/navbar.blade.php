@@ -136,9 +136,6 @@
         class="fixed inset-0 bg-black/60 z-40"
     ></div>
 
-    {{-- ========== WISHLIST DROPDOWN PANEL (teleported to body) ========== --}}
-    @include('wishlist.dropdown')
-
     {{-- ========== DESKTOP MEGA PANEL ========== --}}
     <section
         x-show="open"
