@@ -1,8 +1,14 @@
-# HeirLuxury — Prompt Plan: Quality Infrastructure Setup
+# HeirLuxury — Prompt Plan
 
-This plan implements the quality engineering practices defined in `spec.md`.
+This plan tracks all implementation work for HeirLuxury.
 Each prompt is a self-contained step. Execute them in order. Mark each as
 ✅ when complete.
+
+---
+
+## Phase 1: Quality Infrastructure Setup
+
+Implements the quality engineering practices defined in `spec.md`.
 
 ---
 
@@ -231,6 +237,167 @@ Final quality verification pass:
 7. Mark all prompts as ✅ complete
 
 If anything fails, fix it before marking as done.
+```
+
+---
+
+---
+
+## Phase 2: Feature Work & Cleanup
+
+---
+
+## Prompt 11: Add Wishlist / Favorites Feature
+
+**Status**: ✅ Complete
+
+```text
+Add a wishlist (favorites) feature that lets users save products to a
+persistent list, accessible from the navbar.
+
+1. Backend:
+   - Create a `wishlist_items` table (migration) with columns:
+     session_id (for guests), user_id (nullable, for logged-in users),
+     product_id, created_at
+   - Create WishlistController with: toggle (add/remove), index (list), count
+   - Add API routes: POST /wishlist/toggle/{product}, GET /wishlist,
+     GET /wishlist/count
+   - Use session-based storage for guests, DB for authenticated users
+   - Merge session wishlist into user wishlist on login
+
+2. Frontend — Heart Button:
+   - Add a heart icon button (outline when not saved, filled when saved)
+     on product cards (resources/views/components/product/card.blade.php)
+     and on the product detail page
+   - Use Alpine.js to toggle wishlist state via fetch() to the API
+   - Animate the heart on toggle (scale + color transition)
+
+3. Frontend — Navbar Wishlist Icon:
+   - Add a heart icon to the navbar (resources/views/layouts/navbar.blade.php)
+     to the LEFT of the contact button in the right-side group
+   - Show a small badge/counter with the number of wishlist items
+   - On click, open a slide-out panel or navigate to a wishlist page
+     showing saved products with remove buttons
+   - Include on both desktop and mobile navbar sections
+
+4. Wishlist Page/Panel:
+   - Create a wishlist view showing saved products as cards
+   - Each card has a remove (heart toggle) button
+   - Empty state with a message like "Your wishlist is empty"
+   - Link to product detail page from each card
+
+5. Tests (TDD):
+   - Write tests FIRST for: toggle add, toggle remove, count endpoint,
+     guest session persistence, authenticated user persistence,
+     session-to-user merge on login
+   - Then implement to make tests pass
+
+6. Run pre-commit hooks and commit when all tests pass.
+```
+
+---
+
+## Prompt 12: Update Sidenav and Mega Menu from brands.tsv
+
+**Status**: ⬜ Incomplete
+
+```text
+Update the catalog sidenav and mega menu to reflect the current brand
+catalog as defined in brands.tsv.
+
+Source file: C:\Users\simon\Documents\Scripts\Scraper\brands.tsv
+Format: brand<TAB>subcat<TAB>url (lines starting with # are comments)
+
+Brands in brands.tsv (the source of truth):
+  Nike, Yeezy, Versace, Moncler, Philipp Plein, OFFwhite, McQueen,
+  Amiri, Gucci, Celine, Givenchy, Dior, Chanel, LV
+
+Brands currently in config/categories.php but NOT in brands.tsv:
+  Hermès — REMOVE from config (no longer sourced)
+
+Brands in brands.tsv but NOT yet in config/categories.php:
+  Amiri, Gucci, Philipp Plein — ADD to config
+
+New sections/categories to add:
+  Women: Gucci Bags, Gucci Shoes, Gucci Clothes, Gucci Jewelry,
+         Gucci Glasses, Amiri Women Clothes, Amiri Women Shoes
+  Men:   Gucci Men Shoes, Gucci Men Clothes, Gucci Men Belts,
+         Amiri Men Clothes, Amiri Men Shoes, Philipp Plein Men Shoes,
+         Givenchy Men Glasses
+
+Sections to remove (brand no longer sourced):
+  All Hermès entries (bags, shoes, clothing, belts, jewelry, glasses)
+
+1. Parse brands.tsv and compare against config/categories.php:
+   - The subcat column format is "{Brand} {Gender} {section}"
+   - Map section names: bags->Bags, shoes->Shoes, clothes->Clothing,
+     belts->Belts, jewelry->Jewelry, glasses->Glasses
+   - Slug format: {brand-lowercase}-{gender}-{section}
+     e.g. "Gucci Women bags" -> slug "gucci-women-bags"
+
+2. Update config/categories.php:
+   - Remove all Hermès entries
+   - Add Gucci entries (Women: bags, shoes, clothes, jewelry, glasses;
+     Men: shoes, clothes, belts)
+   - Add Amiri entries (Women: clothes, shoes; Men: clothes, shoes)
+   - Add Philipp Plein (Men: shoes)
+   - Add Givenchy Men Glasses, Givenchy Women Jewelry
+   - Add Chanel Women Belts (present in TSV, missing from config)
+   - Verify Versace Men Belts is present (it is in config)
+   - Keep existing display name conventions (e.g. "Louis Vuitton" not "LV")
+   - Sort brands alphabetically within each section
+
+3. Verify the mega menu (resources/views/catalog/mega.blade.php)
+   renders correctly with the updated config:
+   - Check that brand links resolve to valid routes
+   - Ensure gender tabs (Women/Men) show correct sections
+   - Verify section groupings match the updated config
+
+4. Verify the sidenav (resources/views/catalog/_sidenav.blade.php)
+   also reflects the updated categories correctly
+
+5. Test that all category routes work by running existing feature tests
+6. Run pre-commit hooks and commit when passing
+```
+
+---
+
+## Prompt 13: Review and Purge Artisan Commands
+
+**Status**: ⬜ Incomplete
+
+```text
+Audit all custom Artisan commands in app/Console/Commands/ and remove
+any that are no longer needed.
+
+Current commands to review:
+- BackfillSlugs.php — Was this a one-time migration? Is it still needed?
+- BackfillProductSlugs.php — Same question. Overlaps with BackfillSlugs?
+- DeduplicateImages.php — One-time cleanup or ongoing utility?
+- GenerateThumbnails.php — Likely still needed for image processing
+- ImportBrands.php — Still needed if brands.tsv import is active
+- ImportLV.php — One-time LV product import? Still relevant?
+
+For each command:
+1. Read the source code and understand what it does
+2. Check git log for when it was last modified and used
+3. Determine if it's: KEEP (ongoing utility), ARCHIVE (document and
+   remove), or DELETE (no longer relevant)
+4. For commands marked DELETE/ARCHIVE:
+   - Verify no scheduled tasks or other code references them
+   - Remove the file
+5. For commands marked KEEP:
+   - Verify they still work by running with --dry-run or --help
+   - Check for hardcoded paths or outdated assumptions
+   - Fix any issues found
+
+6. Also check for one-off utility scripts in the project root:
+   - check_folders.php — One-off script with hardcoded local paths
+   - copy_products_to_imports.php — One-off migration script
+   - reorganize-imports.ps1 — PowerShell utility script
+   Delete these if they are no longer needed.
+
+7. Run tests and pre-commit hooks, then commit.
 ```
 
 ---

@@ -118,12 +118,12 @@
         @endforeach
     </div>
 
-    {{-- MEN PANEL (centered - only 3 columns) --}}
+    {{-- MEN PANEL (centered) --}}
     <div
         x-show="gender === 'men'"
         x-transition.opacity
         class="mega-grid justify-center"
-        style="grid-template-columns: repeat(3, minmax(0, max-content));"
+        style="grid-template-columns: repeat({{ $menSections->count() }}, minmax(0, max-content));"
     >
         @foreach ($menSections as $sectionLabel => $items)
             <section class="mega-col">
