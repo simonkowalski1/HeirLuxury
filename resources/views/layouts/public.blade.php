@@ -26,8 +26,5 @@
     {{-- contact modal --}}
     @include('contact.modal')
 
-    {{-- Wishlist dropdown — outside navbar to avoid stacking context issues --}}
-    @include('wishlist.dropdown')
-
 </body>
 </html>
