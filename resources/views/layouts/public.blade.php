@@ -12,11 +12,8 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/favicon-180x180.png">
 
-    {{-- Tailwind + app.js via Vite (Breeze style) --}}
+    {{-- Tailwind + app.js via Vite (includes Alpine.js with stores) --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    {{-- Alpine for navbar + mega menu --}}
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-50 antialiased">
 
