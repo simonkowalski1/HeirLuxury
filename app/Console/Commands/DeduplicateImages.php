@@ -1,5 +1,8 @@
 <?php
 
+// ABOUTME: Artisan command to remove duplicate lower-quality images from product folders.
+// ABOUTME: Supports --dry-run, --min-size threshold, and --path filtering.
+
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;

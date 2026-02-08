@@ -13,8 +13,6 @@ class Kernel extends ConsoleKernel
      * @var array<int, class-string>
      */
     protected array $commands = [
-        \App\Console\Commands\BackfillProductSlugs::class,
-        \App\Console\Commands\BackfillSlugs::class,
     ];
 
     protected function schedule(Schedule $schedule): void

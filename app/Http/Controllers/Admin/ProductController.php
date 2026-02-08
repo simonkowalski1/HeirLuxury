@@ -18,7 +18,6 @@ use Illuminate\Support\Str;
  *
  * Note: For bulk product management, consider using:
  * - php artisan import:lv (bulk import from folders)
- * - php artisan products:backfill-slugs (regenerate slugs)
  *
  * Access: Requires authentication + admin middleware.
  *

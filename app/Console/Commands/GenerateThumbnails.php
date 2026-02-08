@@ -1,5 +1,8 @@
 <?php
 
+// ABOUTME: Artisan command to batch generate optimized WebP thumbnails for product images.
+// ABOUTME: Supports --size, --folder, and --force flags for targeted or full regeneration.
+
 namespace App\Console\Commands;
 
 use App\Services\ThumbnailService;

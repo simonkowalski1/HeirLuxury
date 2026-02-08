@@ -1,5 +1,8 @@
 <?php
 
+// ABOUTME: Artisan command to import luxury product catalogs from folder structure into DB.
+// ABOUTME: Dynamically parses {brand}-{section}-{gender} folders and generates thumbnails.
+
 namespace App\Console\Commands;
 
 use App\Models\Product;
@@ -27,7 +30,7 @@ use Illuminate\Support\Str;
  * - lv-bags-women, lv-shoes-men, lv-clothes-women, etc.
  * - chanel-bags-women, chanel-shoes-men, etc.
  * - dior-bags-women, dior-shoes-men, etc.
- * - hermes-bags-women, hermes-shoes-men, etc.
+ * - Any {brand}-{section}-{gender} folder is auto-parsed.
  *
  * Usage:
  *   php artisan import:lv              # Import new products, skip existing
@@ -52,7 +55,6 @@ class ImportLV extends Command
         'lv' => 'louis-vuitton',
         'chanel' => 'chanel',
         'dior' => 'dior',
-        'hermes' => 'hermes',
     ];
 
     /**
