@@ -127,16 +127,16 @@
         </div>
     </div>
 
-    {{-- ========== DARK BACKDROP (closes both mega + mobile + wishlist) ========== --}}
+    {{-- ========== DARK BACKDROP (closes mega + mobile menus) ========== --}}
     <div
-        x-show="open || mobile || $store.wishlist.open"
+        x-show="open || mobile"
         x-transition.opacity
         x-cloak
-        @click="open = false; mobile = false; $store.wishlist.open = false"
+        @click="open = false; mobile = false"
         class="fixed inset-0 bg-black/60 z-40"
     ></div>
 
-    {{-- ========== WISHLIST DROPDOWN PANEL ========== --}}
+    {{-- ========== WISHLIST DROPDOWN PANEL (teleported to body) ========== --}}
     @include('wishlist.dropdown')
 
     {{-- ========== DESKTOP MEGA PANEL ========== --}}
