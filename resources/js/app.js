@@ -128,10 +128,9 @@ Alpine.store("wishlist", {
             }
             this.count = this.ids.length;
 
-            // Refresh items if the dropdown is open
-            if (this.open) {
-                await this.loadItems();
-            }
+            // Open the dropdown and refresh items so the user sees the result
+            this.open = true;
+            await this.loadItems();
         } catch {
             // Silently fail
         }

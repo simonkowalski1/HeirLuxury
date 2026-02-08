@@ -12,7 +12,7 @@
 
         {{-- LEFT: PRODUCT IMAGE GALLERY --}}
         <div>
-            <x-product.gallery :images="$images" class="max-w-xl" />
+            <x-product.gallery :images="$images" :product-id="$product->id" class="max-w-xl" />
         </div>
 
         {{-- RIGHT: PRODUCT DETAILS --}}

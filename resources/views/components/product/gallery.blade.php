@@ -1,6 +1,7 @@
 {{-- resources/views/components/product/gallery.blade.php --}}
 @props([
     'images' => [],
+    'productId' => null,
 ])
 
 @php
@@ -66,6 +67,32 @@
                     decoding="async"
                 >
             </button>
+
+            {{-- Wishlist heart button (top-right of hero image) --}}
+            @if ($productId)
+                <button
+                    type="button"
+                    @click.prevent.stop="$store.wishlist.toggle({{ $productId }})"
+                    class="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center rounded-full
+                           bg-black/60 border border-white/10 hover:bg-amber-400 hover:border-amber-400
+                           transition-all duration-200 hover:scale-110"
+                    :class="$store.wishlist.has({{ $productId }})
+                        ? 'text-amber-400 hover:text-black'
+                        : 'text-white/70 hover:text-black'"
+                    :aria-label="$store.wishlist.has({{ $productId }})
+                        ? '{{ __('messages.remove_from_wishlist') }}'
+                        : '{{ __('messages.add_to_wishlist') }}'"
+                >
+                    {{-- Outline heart (not wishlisted) --}}
+                    <svg x-show="!$store.wishlist.has({{ $productId }})" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                    </svg>
+                    {{-- Filled heart (wishlisted) --}}
+                    <svg x-show="$store.wishlist.has({{ $productId }})" x-cloak class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                    </svg>
+                </button>
+            @endif
 
             {{-- Bottom bar: counter + arrows --}}
             <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between">
