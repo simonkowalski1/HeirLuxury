@@ -11,7 +11,7 @@
 @if (count($images))
     <div
         {{ $attributes->merge([
-            'class' => 'grid grid-cols-[96px_1fr] gap-3 items-start',
+            'class' => 'grid grid-cols-[96px_1fr] gap-3 items-start overflow-hidden',
         ]) }}
         x-data="{
             idx: 0,
@@ -51,7 +51,7 @@
         </nav>
 
         {{-- Hero image - uses optimized gallery size --}}
-        <div class="relative h-[520px]">
+        <div class="relative h-[520px] min-w-0">
             <button
                 type="button"
                 @click="lightbox = true"

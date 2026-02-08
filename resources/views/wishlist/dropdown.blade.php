@@ -1,17 +1,16 @@
-{{-- resources/views/wishlist/dropdown.blade.php --}}
-{{-- Wishlist dropdown panel — lives inside navbar's Alpine scope --}}
+{{-- ABOUTME: Wishlist dropdown panel that appears below the navbar heart icon. --}}
+{{-- ABOUTME: Uses absolute positioning anchored to the heart button's wrapper. --}}
 
-{{-- Wishlist backdrop --}}
+{{-- Wishlist backdrop (closes panel on click-away) --}}
 <div
     x-show="$store.wishlist.open"
     x-transition.opacity
     x-cloak
     @click="$store.wishlist.open = false"
-    style="z-index: 9998;"
-    class="fixed inset-0 bg-black/60"
+    class="fixed inset-0 z-40"
 ></div>
 
-{{-- Wishlist panel --}}
+{{-- Wishlist panel (positioned below the heart icon) --}}
 <section
     x-show="$store.wishlist.open"
     x-cloak
@@ -22,8 +21,7 @@
     x-transition:leave-start="opacity-100 translate-y-0"
     x-transition:leave-end="opacity-0 -translate-y-1"
     @keydown.escape.window="$store.wishlist.open = false"
-    style="z-index: 9999;"
-    class="fixed right-4 top-14 w-80 sm:w-96 max-h-[70vh] rounded-2xl
+    class="absolute right-0 top-full mt-3 w-80 sm:w-96 max-h-[70vh] rounded-2xl z-50
            bg-slate-950/95 border border-yellow-500/30 shadow-2xl shadow-black/60
            backdrop-blur-xl overflow-hidden flex flex-col"
 >

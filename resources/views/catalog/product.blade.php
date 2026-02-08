@@ -11,7 +11,7 @@
     <div class="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-2 gap-10">
 
         {{-- LEFT: PRODUCT IMAGE GALLERY --}}
-        <div>
+        <div class="min-w-0">
             <x-product.gallery :images="$images" :product-id="$product->id" class="max-w-xl" />
         </div>
 
