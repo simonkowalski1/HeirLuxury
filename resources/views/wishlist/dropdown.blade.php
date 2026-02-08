@@ -74,11 +74,11 @@
         {{-- Product items --}}
         <template x-for="item in $store.wishlist.items" :key="item.id">
             <div class="flex items-center gap-3 px-4 py-3 border-b border-white/5 hover:bg-white/5 transition">
-                {{-- Product name + brand --}}
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm text-white truncate" x-text="item.name"></p>
+                {{-- Product name + brand (clickable link to product page) --}}
+                <a :href="item.url" class="flex-1 min-w-0 group">
+                    <p class="text-sm text-white truncate group-hover:text-amber-400 transition" x-text="item.name"></p>
                     <p class="text-xs text-white/40" x-text="item.brand"></p>
-                </div>
+                </a>
 
                 {{-- Remove button --}}
                 <button

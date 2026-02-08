@@ -59,8 +59,19 @@ class WishlistController extends Controller
             return response()->json(['items' => []]);
         }
 
+        $locale = app()->getLocale();
+
         $products = Product::whereIn('id', $ids)
-            ->get(['id', 'name', 'slug', 'category_slug', 'brand', 'image_path']);
+            ->get(['id', 'name', 'slug', 'category_slug', 'brand', 'image_path'])
+            ->map(function ($product) use ($locale) {
+                $product->url = route('product.show', [
+                    'locale' => $locale,
+                    'category' => $product->category_slug,
+                    'productSlug' => $product->slug,
+                ]);
+
+                return $product;
+            });
 
         return response()->json([
             'items' => $products,
