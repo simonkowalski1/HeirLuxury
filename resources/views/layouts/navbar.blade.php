@@ -57,6 +57,25 @@
                 </a>
             </div>
 
+            {{-- Wishlist Heart --}}
+            <button
+                type="button"
+                @click="$store.wishlist.togglePanel()"
+                class="relative text-white/70 hover:text-amber-400 transition"
+                aria-label="{{ __('messages.wishlist') }}"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                </svg>
+                <span
+                    x-show="$store.wishlist.count > 0"
+                    x-text="$store.wishlist.count"
+                    x-cloak
+                    class="absolute -top-1.5 -right-2 bg-amber-400 text-black text-[10px] font-bold
+                           rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5"
+                ></span>
+            </button>
+
             <button
                 type="button"
                 onclick="window.dispatchEvent(new Event('open-contact-modal'))"
@@ -66,8 +85,27 @@
             </button>
         </div>
 
-        {{-- MOBILE: CONTACT + HAMBURGER --}}
+        {{-- MOBILE: WISHLIST + CONTACT + HAMBURGER --}}
         <div class="flex items-center gap-2 lg:hidden">
+            {{-- Wishlist Heart (mobile) --}}
+            <button
+                type="button"
+                @click="$store.wishlist.togglePanel()"
+                class="relative text-white/70 hover:text-amber-400 transition"
+                aria-label="{{ __('messages.wishlist') }}"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                </svg>
+                <span
+                    x-show="$store.wishlist.count > 0"
+                    x-text="$store.wishlist.count"
+                    x-cloak
+                    class="absolute -top-1.5 -right-2 bg-amber-400 text-black text-[10px] font-bold
+                           rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5"
+                ></span>
+            </button>
+
             <button
                 type="button"
                 onclick="window.dispatchEvent(new Event('open-contact-modal'))"
@@ -89,14 +127,17 @@
         </div>
     </div>
 
-    {{-- ========== DARK BACKDROP (closes both mega + mobile) ========== --}}
+    {{-- ========== DARK BACKDROP (closes both mega + mobile + wishlist) ========== --}}
     <div
-        x-show="open || mobile"
+        x-show="open || mobile || $store.wishlist.open"
         x-transition.opacity
         x-cloak
-        @click="open = false; mobile = false"
+        @click="open = false; mobile = false; $store.wishlist.open = false"
         class="fixed inset-0 bg-black/60 z-40"
     ></div>
+
+    {{-- ========== WISHLIST DROPDOWN PANEL ========== --}}
+    @include('wishlist.dropdown')
 
     {{-- ========== DESKTOP MEGA PANEL ========== --}}
     <section

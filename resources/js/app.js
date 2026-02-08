@@ -90,5 +90,73 @@ window.productCarousel = function (totalItems) {
     };
 };
 
+// Wishlist store — shared reactive state for heart buttons and navbar badge
+Alpine.store("wishlist", {
+    ids: [],
+    count: 0,
+    items: [],
+    open: false,
+    loading: false,
+
+    async init() {
+        try {
+            const res = await fetch("/api/wishlist/ids");
+            const data = await res.json();
+            this.ids = data.ids || [];
+            this.count = this.ids.length;
+        } catch {
+            // Silently fail — wishlist is non-critical
+        }
+    },
+
+    has(productId) {
+        return this.ids.includes(productId);
+    },
+
+    async toggle(productId) {
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.content || "";
+        try {
+            const res = await fetch(`/api/wishlist/toggle/${productId}`, {
+                method: "POST",
+                headers: { "X-CSRF-TOKEN": csrf, Accept: "application/json" },
+            });
+            const data = await res.json();
+            if (data.wishlisted) {
+                this.ids.push(productId);
+            } else {
+                this.ids = this.ids.filter((id) => id !== productId);
+            }
+            this.count = this.ids.length;
+
+            // Refresh items if the dropdown is open
+            if (this.open) {
+                await this.loadItems();
+            }
+        } catch {
+            // Silently fail
+        }
+    },
+
+    async loadItems() {
+        this.loading = true;
+        try {
+            const res = await fetch("/api/wishlist/items");
+            const data = await res.json();
+            this.items = data.items || [];
+        } catch {
+            this.items = [];
+        } finally {
+            this.loading = false;
+        }
+    },
+
+    async togglePanel() {
+        this.open = !this.open;
+        if (this.open) {
+            await this.loadItems();
+        }
+    },
+});
+
 window.Alpine = Alpine;
 Alpine.start();

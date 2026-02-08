@@ -26,6 +26,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController as FrontProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -97,6 +98,15 @@ Route::post('/inquiry', [ContactController::class, 'submit'])->name('inquiry.sub
 
 Route::get('/api/catalog/products', [FrontCategoryController::class, 'apiProducts'])
     ->name('api.catalog.products');
+
+Route::post('/api/wishlist/toggle/{product}', [WishlistController::class, 'toggle'])
+    ->name('wishlist.toggle');
+Route::get('/api/wishlist/count', [WishlistController::class, 'count'])
+    ->name('wishlist.count');
+Route::get('/api/wishlist/ids', [WishlistController::class, 'ids'])
+    ->name('wishlist.ids');
+Route::get('/api/wishlist/items', [WishlistController::class, 'items'])
+    ->name('wishlist.items');
 
 /*
 |--------------------------------------------------------------------------

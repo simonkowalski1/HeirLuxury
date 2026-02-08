@@ -37,6 +37,13 @@ return [
     'message_sent' => 'Your message has been sent. We will get back to you soon.',
     'close' => 'Close',
 
+    // Wishlist
+    'wishlist' => 'Wishlist',
+    'add_to_wishlist' => 'Add to Wishlist',
+    'remove_from_wishlist' => 'Remove from Wishlist',
+    'wishlist_empty' => 'Your wishlist is empty',
+    'wishlist_empty_description' => 'Browse our collections and save your favorite pieces.',
+
     // Categories
     'bags' => 'Bags',
     'shoes' => 'Shoes',

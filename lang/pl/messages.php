@@ -37,6 +37,13 @@ return [
     'message_sent' => 'Twoja wiadomość została wysłana. Skontaktujemy się wkrótce.',
     'close' => 'Zamknij',
 
+    // Wishlist
+    'wishlist' => 'Lista życzeń',
+    'add_to_wishlist' => 'Dodaj do listy życzeń',
+    'remove_from_wishlist' => 'Usuń z listy życzeń',
+    'wishlist_empty' => 'Twoja lista życzeń jest pusta',
+    'wishlist_empty_description' => 'Przeglądaj nasze kolekcje i zapisuj ulubione produkty.',
+
     // Categories
     'bags' => 'Torby',
     'shoes' => 'Buty',
