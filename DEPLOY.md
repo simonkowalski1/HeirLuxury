@@ -266,10 +266,10 @@ QUEUE_CONNECTION=redis
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-password
+MAIL_USERNAME=<your-gmail-address>
+MAIL_PASSWORD=<your-gmail-app-password>
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS="noreply@yourdomain.com"
+MAIL_FROM_ADDRESS="noreply@<your-domain>"
 MAIL_FROM_NAME="${APP_NAME}"
 ```
 
