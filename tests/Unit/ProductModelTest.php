@@ -28,6 +28,7 @@ class ProductModelTest extends TestCase
             'folder',
             'image',
             'image_path',
+            'thumbnail',
         ];
 
         $this->assertEquals($expected, $product->getFillable());

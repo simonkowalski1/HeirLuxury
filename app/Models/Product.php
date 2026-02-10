@@ -40,6 +40,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $folder Name of the image folder in storage
  * @property string $image Primary image filename
  * @property string|null $image_path Full relative path to primary image
+ * @property string|null $thumbnail Path to custom WebP card thumbnail
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  *
@@ -63,6 +64,7 @@ class Product extends Model
         'folder',
         'image',
         'image_path',
+        'thumbnail',
     ];
 
     /**

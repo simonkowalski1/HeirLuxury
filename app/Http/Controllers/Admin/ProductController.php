@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Intervention\Image\Encoders\WebpEncoder;
+use Intervention\Image\Laravel\Facades\Image;
 
 /**
  * Admin controller for managing products.
@@ -104,6 +107,7 @@ class ProductController extends Controller
             'section' => ['nullable', 'string', 'max:100'],
             'folder' => ['nullable', 'string', 'max:255'],
             'image' => ['nullable', 'image', 'max:4096'],
+            'thumbnail' => ['nullable', 'image', 'max:4096'],
         ]);
 
         // Auto-generate slug from name if not provided
@@ -115,6 +119,11 @@ class ProductController extends Controller
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')
                 ->store('products', 'public');
+        }
+
+        // Handle thumbnail upload with WebP conversion
+        if ($request->hasFile('thumbnail')) {
+            $data['thumbnail'] = $this->storeThumbnailAsWebp($request->file('thumbnail'));
         }
 
         Product::create($data);
@@ -156,6 +165,7 @@ class ProductController extends Controller
             'section' => ['nullable', 'string', 'max:100'],
             'folder' => ['nullable', 'string', 'max:255'],
             'image' => ['nullable', 'image', 'max:4096'],
+            'thumbnail' => ['nullable', 'image', 'max:4096'],
         ]);
 
         // Auto-generate slug from name if not provided
@@ -172,6 +182,16 @@ class ProductController extends Controller
 
             $data['image'] = $request->file('image')
                 ->store('products', 'public');
+        }
+
+        // Handle thumbnail upload with WebP conversion
+        if ($request->hasFile('thumbnail')) {
+            // Delete old thumbnail if exists
+            if ($product->thumbnail) {
+                Storage::disk('public')->delete($product->thumbnail);
+            }
+
+            $data['thumbnail'] = $this->storeThumbnailAsWebp($request->file('thumbnail'));
         }
 
         $product->update($data);
@@ -191,6 +211,11 @@ class ProductController extends Controller
         // Clean up associated image file
         if ($product->image) {
             Storage::disk('public')->delete($product->image);
+        }
+
+        // Clean up thumbnail file
+        if ($product->thumbnail) {
+            Storage::disk('public')->delete($product->thumbnail);
         }
 
         // Clean up gallery images from storage
@@ -231,5 +256,36 @@ class ProductController extends Controller
 
         return redirect()->route('admin.products.index')
             ->with('status', "{$count} product(s) deleted.");
+    }
+
+    /**
+     * Convert an uploaded image to WebP and store it as a product thumbnail.
+     *
+     * Uses Intervention Image to convert any uploaded image format (JPG, PNG, etc.)
+     * to optimized WebP format at 400x300 (card size) for catalog display.
+     *
+     * @param  UploadedFile  $file  The uploaded image file
+     * @return string Storage path to the saved WebP thumbnail
+     */
+    protected function storeThumbnailAsWebp(UploadedFile $file): string
+    {
+        $filename = Str::uuid().'.webp';
+        $storagePath = "products/thumbnails/{$filename}";
+
+        try {
+            // Load, resize to card dimensions, and encode as WebP
+            $image = Image::read($file->getRealPath());
+            $image->cover(400, 300);
+            $encoded = $image->encode(new WebpEncoder(quality: 80));
+
+            Storage::disk('public')->put($storagePath, (string) $encoded);
+        } catch (\Throwable $e) {
+            // If conversion fails, store original file as-is with .webp extension
+            // (graceful degradation for environments without GD/Imagick)
+            report($e);
+            $storagePath = $file->storeAs('products/thumbnails', $filename, 'public');
+        }
+
+        return $storagePath;
     }
 }

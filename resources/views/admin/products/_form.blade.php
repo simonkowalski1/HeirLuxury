@@ -254,6 +254,83 @@
             @enderror
         </div>
 
+        {{-- Card Thumbnail Upload --}}
+        <div class="rounded-2xl border border-white/10 bg-zinc-900/60 p-6"
+             x-data="{
+                thumbPreview: '{{ !empty($product->thumbnail) ? asset('storage/'.$product->thumbnail) : '' }}',
+                thumbFileName: '',
+                handleThumbSelect(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        this.thumbFileName = file.name;
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.thumbPreview = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }
+             }">
+            <h3 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                <svg class="h-4 w-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+                </svg>
+                Card Thumbnail
+            </h3>
+
+            <p class="text-xs text-zinc-500 mb-3">
+                Upload a custom card image. Auto-converted to 400×300 WebP.
+            </p>
+
+            {{-- Thumbnail Preview --}}
+            <div class="mb-4">
+                <div class="aspect-[4/3] rounded-xl bg-zinc-800 border-2 border-dashed border-white/10 overflow-hidden flex items-center justify-center"
+                     :class="{ 'border-solid border-amber-400/50': thumbPreview }">
+                    <template x-if="thumbPreview">
+                        <img :src="thumbPreview" alt="Thumbnail preview" class="w-full h-full object-cover">
+                    </template>
+                    <template x-if="!thumbPreview">
+                        <div class="text-center p-4">
+                            <svg class="mx-auto h-10 w-10 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z"/>
+                            </svg>
+                            <p class="mt-2 text-xs text-zinc-500">No thumbnail</p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            {{-- File Input --}}
+            <label class="block">
+                <span class="sr-only">Choose card thumbnail</span>
+                <input type="file"
+                       name="thumbnail"
+                       accept="image/*"
+                       @change="handleThumbSelect($event)"
+                       class="block w-full text-sm text-zinc-400
+                              file:mr-3 file:rounded-full file:border-0
+                              file:bg-amber-400 file:px-4 file:py-2 file:text-sm file:font-semibold
+                              file:text-black hover:file:bg-amber-300 file:cursor-pointer
+                              file:transition-colors">
+            </label>
+
+            {{-- File Name Display --}}
+            <p x-show="thumbFileName" x-text="thumbFileName" class="mt-2 text-xs text-zinc-400 truncate"></p>
+
+            {{-- Current Thumbnail Info --}}
+            @if(!empty($product->thumbnail))
+                <div class="mt-3 pt-3 border-t border-white/10">
+                    <p class="text-xs text-zinc-500">
+                        Current: <span class="text-zinc-400">{{ basename($product->thumbnail) }}</span>
+                    </p>
+                </div>
+            @endif
+
+            @error('thumbnail')
+            <p class="mt-2 text-xs text-red-400">{{ $message }}</p>
+            @enderror
+        </div>
+
         {{-- Product Status Card (for edit mode) --}}
         @if(!empty($product->id))
             <div class="rounded-2xl border border-white/10 bg-zinc-900/60 p-6">

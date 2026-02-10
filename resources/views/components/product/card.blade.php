@@ -67,35 +67,42 @@
     $folder    = $val('folder');
     $imageName = $val('image');
 
-    // 1) Prefer cover.jpg (scraped thumbnail) if it exists
-    $imagePath = null;
-    if ($baseFolder && $folder) {
-        $coverPath = "imports/{$baseFolder}/{$folder}/cover.jpg";
-        if (Storage::disk('public')->exists($coverPath)) {
-            $imagePath = $coverPath;
-        }
-    }
-
-    // 2) Fall back to stored image_path
-    if (! $imagePath) {
-        $imagePath = $val('image_path');
-    }
-
-    // 3) If still empty, build from baseFolder + folder + image
-    if (! $imagePath && $baseFolder && $folder) {
-        $filename  = $imageName ?: '0000.jpg';
-        $imagePath = "imports/{$baseFolder}/{$folder}/{$filename}";
-    }
-
-    // Use optimized thumbnail service for card images
-    $thumbnailService = app(ThumbnailService::class);
-
-    if ($imagePath) {
-        $img = $thumbnailService->getUrl($imagePath, 'card') ?? Storage::url($imagePath);
-        $originalImg = Storage::url($imagePath);
-    } else {
-        $img = asset('assets/placeholders/product-dark.png');
+    // 0) Prefer custom thumbnail (already WebP, already sized for card)
+    $customThumbnail = $val('thumbnail');
+    if ($customThumbnail) {
+        $img = Storage::disk('public')->url($customThumbnail);
         $originalImg = $img;
+    } else {
+        // 1) Prefer cover.jpg (scraped thumbnail) if it exists
+        $imagePath = null;
+        if ($baseFolder && $folder) {
+            $coverPath = "imports/{$baseFolder}/{$folder}/cover.jpg";
+            if (Storage::disk('public')->exists($coverPath)) {
+                $imagePath = $coverPath;
+            }
+        }
+
+        // 2) Fall back to stored image_path
+        if (! $imagePath) {
+            $imagePath = $val('image_path');
+        }
+
+        // 3) If still empty, build from baseFolder + folder + image
+        if (! $imagePath && $baseFolder && $folder) {
+            $filename  = $imageName ?: '0000.jpg';
+            $imagePath = "imports/{$baseFolder}/{$folder}/{$filename}";
+        }
+
+        // Use optimized thumbnail service for card images
+        $thumbnailService = app(ThumbnailService::class);
+
+        if ($imagePath) {
+            $img = $thumbnailService->getUrl($imagePath, 'card') ?? Storage::url($imagePath);
+            $originalImg = Storage::url($imagePath);
+        } else {
+            $img = asset('assets/placeholders/product-dark.png');
+            $originalImg = $img;
+        }
     }
 
     $alt = $val('alt', $name);
