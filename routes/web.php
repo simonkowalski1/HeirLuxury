@@ -18,6 +18,7 @@
  * - /admin/*              → Admin panel (requires auth + admin middleware)
  */
 
+use App\Http\Controllers\Admin\ActivityLogController as AdminActivityLogController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
@@ -172,6 +173,7 @@ Route::middleware(['auth', 'admin'])
         Route::delete('products/bulk', [AdminProductController::class, 'bulkDestroy'])->name('products.bulk-destroy');
         Route::resource('products', AdminProductController::class);
         Route::resource('categories', AdminCategoryController::class);
+        Route::get('activity-log', [AdminActivityLogController::class, 'index'])->name('activity-log.index');
     });
 
 /*

@@ -27,6 +27,11 @@
        class="block px-3 py-2 rounded-lg hover:bg-white/5 @if(request()->routeIs('admin.categories.*')) bg-white/10 @endif">
         Categories
     </a>
+
+    <a href="{{ route('admin.activity-log.index') }}"
+       class="block px-3 py-2 rounded-lg hover:bg-white/5 @if(request()->routeIs('admin.activity-log.*')) bg-white/10 @endif">
+        Activity Log
+    </a>
 </nav>
 
 
