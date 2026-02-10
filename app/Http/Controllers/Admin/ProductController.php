@@ -53,7 +53,12 @@ class ProductController extends Controller
             $query->where('gender', $gender);
         }
 
-        $products = $query->orderBy('name')->paginate(20)->withQueryString();
+        // Sortable columns (whitelist to prevent SQL injection)
+        $sortableColumns = ['name', 'brand', 'gender', 'section', 'created_at'];
+        $sort = in_array($request->get('sort'), $sortableColumns) ? $request->get('sort') : 'name';
+        $direction = $request->get('direction') === 'desc' ? 'desc' : 'asc';
+
+        $products = $query->orderBy($sort, $direction)->paginate(20)->withQueryString();
 
         // Get unique brands and genders for filter dropdowns
         $brands = Product::whereNotNull('brand')
@@ -65,7 +70,7 @@ class ProductController extends Controller
             ->distinct()
             ->pluck('gender');
 
-        return view('admin.products.index', compact('products', 'brands', 'genders'));
+        return view('admin.products.index', compact('products', 'brands', 'genders', 'sort', 'direction'));
     }
 
     /**

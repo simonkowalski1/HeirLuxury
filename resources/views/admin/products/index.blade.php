@@ -132,6 +132,17 @@
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
                 <thead class="bg-zinc-800/50">
+                @php
+                    // Build sort URL helper: toggles direction if already sorting by this column
+                    $sortUrl = function (string $column) use ($sort, $direction) {
+                        $newDirection = ($sort === $column && $direction === 'asc') ? 'desc' : 'asc';
+                        return request()->fullUrlWithQuery(['sort' => $column, 'direction' => $newDirection]);
+                    };
+                    $sortIcon = function (string $column) use ($sort, $direction) {
+                        if ($sort !== $column) return '';
+                        return $direction === 'asc' ? '▲' : '▼';
+                    };
+                @endphp
                 <tr class="text-left text-xs uppercase text-zinc-400">
                     <th class="px-4 py-3 w-10">
                         <input type="checkbox"
@@ -140,10 +151,27 @@
                                class="rounded border-white/20 bg-zinc-700 text-amber-400 focus:ring-amber-400/50">
                     </th>
                     <th class="px-4 py-3 w-16">Image</th>
-                    <th class="px-4 py-3">Name</th>
+                    <th class="px-4 py-3">
+                        <a href="{{ $sortUrl('name') }}" class="inline-flex items-center gap-1 hover:text-white transition-colors">
+                            Name <span class="text-amber-400">{{ $sortIcon('name') }}</span>
+                        </a>
+                    </th>
                     <th class="px-4 py-3">Category</th>
-                    <th class="px-4 py-3">Brand</th>
-                    <th class="px-4 py-3">Gender</th>
+                    <th class="px-4 py-3">
+                        <a href="{{ $sortUrl('brand') }}" class="inline-flex items-center gap-1 hover:text-white transition-colors">
+                            Brand <span class="text-amber-400">{{ $sortIcon('brand') }}</span>
+                        </a>
+                    </th>
+                    <th class="px-4 py-3">
+                        <a href="{{ $sortUrl('gender') }}" class="inline-flex items-center gap-1 hover:text-white transition-colors">
+                            Gender <span class="text-amber-400">{{ $sortIcon('gender') }}</span>
+                        </a>
+                    </th>
+                    <th class="px-4 py-3">
+                        <a href="{{ $sortUrl('created_at') }}" class="inline-flex items-center gap-1 hover:text-white transition-colors">
+                            Added <span class="text-amber-400">{{ $sortIcon('created_at') }}</span>
+                        </a>
+                    </th>
                     <th class="px-4 py-3 w-32 text-right">Actions</th>
                 </tr>
                 </thead>
@@ -187,6 +215,9 @@
                                 <span class="text-zinc-500">—</span>
                             @endif
                         </td>
+                        <td class="px-4 py-3 text-xs text-zinc-500 whitespace-nowrap">
+                            {{ $product->created_at->format('M j, Y') }}
+                        </td>
                         <td class="px-4 py-3 text-right">
                             <div class="flex items-center justify-end gap-2">
                                 <a href="{{ route('admin.products.edit', $product) }}"
@@ -214,7 +245,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-4 py-12">
+                        <td colspan="8" class="px-4 py-12">
                             <div class="text-center">
                                 <svg class="mx-auto h-12 w-12 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>

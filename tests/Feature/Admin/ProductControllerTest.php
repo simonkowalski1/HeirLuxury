@@ -326,4 +326,120 @@ class ProductControllerTest extends TestCase
         $response->assertOk();
         $response->assertSee('No products match your search');
     }
+
+    // ==================== Sorting Tests ====================
+
+    public function test_products_can_be_sorted_by_name_ascending(): void
+    {
+        Product::factory()->create(['name' => 'Zephyr Bag']);
+        Product::factory()->create(['name' => 'Alpha Wallet']);
+        Product::factory()->create(['name' => 'Metro Shoes']);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.products.index', [
+            'sort' => 'name',
+            'direction' => 'asc',
+        ]));
+
+        $response->assertOk();
+        $products = $response->viewData('products');
+        $this->assertEquals('Alpha Wallet', $products->first()->name);
+        $this->assertEquals('Zephyr Bag', $products->last()->name);
+    }
+
+    public function test_products_can_be_sorted_by_name_descending(): void
+    {
+        Product::factory()->create(['name' => 'Zephyr Bag']);
+        Product::factory()->create(['name' => 'Alpha Wallet']);
+        Product::factory()->create(['name' => 'Metro Shoes']);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.products.index', [
+            'sort' => 'name',
+            'direction' => 'desc',
+        ]));
+
+        $response->assertOk();
+        $products = $response->viewData('products');
+        $this->assertEquals('Zephyr Bag', $products->first()->name);
+        $this->assertEquals('Alpha Wallet', $products->last()->name);
+    }
+
+    public function test_products_can_be_sorted_by_brand(): void
+    {
+        Product::factory()->forBrand('Dior')->create();
+        Product::factory()->forBrand('Amiri')->create();
+        Product::factory()->forBrand('Chanel')->create();
+
+        $response = $this->actingAs($this->admin)->get(route('admin.products.index', [
+            'sort' => 'brand',
+            'direction' => 'asc',
+        ]));
+
+        $response->assertOk();
+        $products = $response->viewData('products');
+        $this->assertEquals('Amiri', $products->first()->brand);
+        $this->assertEquals('Dior', $products->last()->brand);
+    }
+
+    public function test_products_can_be_sorted_by_created_at(): void
+    {
+        $oldest = Product::factory()->create(['name' => 'Oldest', 'created_at' => now()->subDays(3)]);
+        $newest = Product::factory()->create(['name' => 'Newest', 'created_at' => now()]);
+        $middle = Product::factory()->create(['name' => 'Middle', 'created_at' => now()->subDay()]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.products.index', [
+            'sort' => 'created_at',
+            'direction' => 'desc',
+        ]));
+
+        $response->assertOk();
+        $products = $response->viewData('products');
+        $this->assertEquals('Newest', $products->first()->name);
+        $this->assertEquals('Oldest', $products->last()->name);
+    }
+
+    public function test_products_default_sort_is_name_ascending(): void
+    {
+        Product::factory()->create(['name' => 'Zeta']);
+        Product::factory()->create(['name' => 'Alpha']);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.products.index'));
+
+        $response->assertOk();
+        $products = $response->viewData('products');
+        $this->assertEquals('Alpha', $products->first()->name);
+    }
+
+    public function test_products_sort_ignores_invalid_column(): void
+    {
+        Product::factory()->create(['name' => 'Zeta']);
+        Product::factory()->create(['name' => 'Alpha']);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.products.index', [
+            'sort' => 'password',
+            'direction' => 'asc',
+        ]));
+
+        $response->assertOk();
+        // Falls back to default sort (name asc)
+        $products = $response->viewData('products');
+        $this->assertEquals('Alpha', $products->first()->name);
+    }
+
+    public function test_products_sort_preserves_search_and_filter_params(): void
+    {
+        Product::factory()->forBrand('Louis Vuitton')->create(['name' => 'LV Zeta']);
+        Product::factory()->forBrand('Louis Vuitton')->create(['name' => 'LV Alpha']);
+        Product::factory()->forBrand('Chanel')->create(['name' => 'Chanel Bag']);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.products.index', [
+            'brand' => 'Louis Vuitton',
+            'sort' => 'name',
+            'direction' => 'desc',
+        ]));
+
+        $response->assertOk();
+        $products = $response->viewData('products');
+        $this->assertEquals(2, $products->count());
+        $this->assertEquals('LV Zeta', $products->first()->name);
+    }
 }
