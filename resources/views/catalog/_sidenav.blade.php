@@ -2,8 +2,10 @@
 @php
     use Illuminate\Support\Str;
 
-    // Catalog data
-    $catalog = $catalog ?? (array) config('categories', []);
+    // Catalog data: prefer database categories, fall back to config
+    $navData = \App\Models\Category::getNavigationData();
+    $configData = (array) config('categories', []);
+    $catalog = $catalog ?? (!empty($navData['women']) || !empty($navData['men']) ? $navData : $configData);
 
     // Current locale
     $locale = app()->getLocale();

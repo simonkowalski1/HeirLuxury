@@ -1,8 +1,13 @@
 <?php
 
 /**
- * ABOUTME: Defines the catalog taxonomy for the sidenav and mega menu.
- * ABOUTME: Maps brands to gender-based sections (bags, shoes, clothing, etc.).
+ * ABOUTME: Legacy catalog taxonomy kept as fallback reference.
+ * ABOUTME: The database (categories table) is the primary source of truth.
+ *
+ * DEPRECATED: Navigation reads from the categories table via
+ * Category::getNavigationData(). This file is used as a fallback when the
+ * database has no categories seeded. Run `php artisan db:seed --class=CategorySeeder`
+ * to populate the database from this config.
  */
 
 return [

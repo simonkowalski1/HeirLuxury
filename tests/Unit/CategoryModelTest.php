@@ -17,7 +17,7 @@ class CategoryModelTest extends TestCase
     {
         $category = new Category;
 
-        $expected = ['name', 'slug'];
+        $expected = ['name', 'slug', 'gender', 'section', 'brand', 'display_order', 'is_active'];
 
         $this->assertEquals($expected, $category->getFillable());
     }

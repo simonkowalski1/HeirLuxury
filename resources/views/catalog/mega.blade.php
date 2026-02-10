@@ -1,13 +1,15 @@
 {{-- resources/views/catalog/mega.blade.php --}}
 
 @php
-    // Build sections from config if they weren't passed in
+    // Build sections from database categories (falls back to config if DB is empty)
+    $navData = \App\Models\Category::getNavigationData();
+    $configData = config('categories', []);
 
     $womenSections = $womenSections
-        ?? collect(config('categories.women') ?? []);
+        ?? collect(!empty($navData['women']) ? $navData['women'] : ($configData['women'] ?? []));
 
     $menSections = $menSections
-        ?? collect(config('categories.men') ?? []);
+        ?? collect(!empty($navData['men']) ? $navData['men'] : ($configData['men'] ?? []));
 
     $locale = app()->getLocale();
 

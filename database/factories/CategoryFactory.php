@@ -16,10 +16,17 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         $name = fake()->words(3, true);
+        $genders = ['women', 'men'];
+        $sections = ['bags', 'shoes', 'clothing', 'belts', 'jewelry', 'glasses'];
 
         return [
             'name' => $name,
             'slug' => Str::slug($name),
+            'gender' => fake()->randomElement($genders),
+            'section' => fake()->randomElement($sections),
+            'brand' => fake()->company(),
+            'display_order' => 0,
+            'is_active' => true,
         ];
     }
 }

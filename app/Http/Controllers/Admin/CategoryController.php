@@ -11,19 +11,12 @@ use Illuminate\Support\Str;
  * Admin controller for managing categories.
  *
  * Provides CRUD operations for categories stored in the database.
- *
- * Note: The primary category taxonomy is defined in config/categories.php.
- * Categories created here can be used for dynamic management but
- * navigation currently relies on the config file.
- *
- * To integrate database categories with navigation:
- * 1. Create categories here with matching slugs
- * 2. Update config/categories.php to reference these slugs
+ * Categories drive the frontend navigation (mega menu, sidenav)
+ * through the Category::getNavigationData() method.
  *
  * Access: Requires authentication + admin middleware.
  *
  * @see \App\Models\Category For the Category model
- * @see config/categories.php For the navigation taxonomy
  */
 class CategoryController extends Controller
 {
@@ -86,12 +79,20 @@ class CategoryController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:categories,slug'],
+            'gender' => ['nullable', 'string', 'in:women,men'],
+            'section' => ['nullable', 'string', 'max:50'],
+            'brand' => ['nullable', 'string', 'max:100'],
+            'display_order' => ['nullable', 'integer', 'min:0'],
+            'is_active' => ['nullable'],
         ]);
 
         // Auto-generate slug from name if not provided
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
         }
+
+        // Checkbox: present = active, absent = inactive
+        $data['is_active'] = $request->has('is_active');
 
         Category::create($data);
 
@@ -123,12 +124,20 @@ class CategoryController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:categories,slug,'.$category->id],
+            'gender' => ['nullable', 'string', 'in:women,men'],
+            'section' => ['nullable', 'string', 'max:50'],
+            'brand' => ['nullable', 'string', 'max:100'],
+            'display_order' => ['nullable', 'integer', 'min:0'],
+            'is_active' => ['nullable'],
         ]);
 
         // Auto-generate slug from name if not provided
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
         }
+
+        // Checkbox: present = active, absent = inactive
+        $data['is_active'] = $request->has('is_active');
 
         $category->update($data);
 
