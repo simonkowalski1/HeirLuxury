@@ -125,4 +125,71 @@ class DashboardTest extends TestCase
             return $recentProducts->count() === 0;
         });
     }
+
+    public function test_dashboard_renders_total_products_count(): void
+    {
+        Product::factory()->count(7)->create();
+
+        $response = $this->actingAs($this->admin)->get(route('admin.dashboard'));
+
+        $response->assertOk();
+        $response->assertSeeText('7');
+        $response->assertSeeText('Total Products');
+    }
+
+    public function test_dashboard_renders_total_categories_count(): void
+    {
+        Category::factory()->count(3)->create();
+
+        $response = $this->actingAs($this->admin)->get(route('admin.dashboard'));
+
+        $response->assertOk();
+        $response->assertSeeText('3');
+        $response->assertSeeText('Total Categories');
+    }
+
+    public function test_dashboard_renders_top_brands_list(): void
+    {
+        Product::factory()->count(5)->forBrand('Louis Vuitton')->create();
+        Product::factory()->count(3)->forBrand('Chanel')->create();
+
+        $response = $this->actingAs($this->admin)->get(route('admin.dashboard'));
+
+        $response->assertOk();
+        $response->assertSeeText('Top Brands');
+        $response->assertSeeText('Louis Vuitton');
+        $response->assertSeeText('Chanel');
+    }
+
+    public function test_dashboard_renders_gender_breakdown(): void
+    {
+        Product::factory()->count(6)->forGender('women')->create();
+        Product::factory()->count(4)->forGender('men')->create();
+
+        $response = $this->actingAs($this->admin)->get(route('admin.dashboard'));
+
+        $response->assertOk();
+        $response->assertSeeText('Women');
+        $response->assertSeeText('Men');
+    }
+
+    public function test_dashboard_renders_recent_products_with_edit_links(): void
+    {
+        $product = Product::factory()->create(['name' => 'Unique Test Bag']);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.dashboard'));
+
+        $response->assertOk();
+        $response->assertSeeText('Recent Products');
+        $response->assertSeeText('Unique Test Bag');
+        $response->assertSee(route('admin.products.edit', $product));
+    }
+
+    public function test_dashboard_renders_empty_state_message(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.dashboard'));
+
+        $response->assertOk();
+        $response->assertSeeText('No products yet');
+    }
 }
