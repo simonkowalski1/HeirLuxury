@@ -6,6 +6,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -186,5 +187,38 @@ class CategoryControllerTest extends TestCase
 
         $response->assertRedirect(route('admin.categories.index'));
         $this->assertDatabaseMissing('categories', ['id' => $category->id]);
+    }
+
+    // ==================== Product Count Tests ====================
+
+    public function test_categories_index_shows_product_count(): void
+    {
+        $category = Category::factory()->create(['slug' => 'lv-women-bags']);
+        Product::factory()->count(5)->create(['category_slug' => 'lv-women-bags']);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.categories.index'));
+
+        $response->assertOk();
+        $response->assertSeeText('5');
+    }
+
+    public function test_categories_index_shows_zero_for_empty_categories(): void
+    {
+        Category::factory()->create(['slug' => 'empty-category']);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.categories.index'));
+
+        $response->assertOk();
+        $response->assertSeeText('0');
+    }
+
+    public function test_categories_index_has_products_count_header(): void
+    {
+        Category::factory()->create();
+
+        $response = $this->actingAs($this->admin)->get(route('admin.categories.index'));
+
+        $response->assertOk();
+        $response->assertSeeText('Products');
     }
 }

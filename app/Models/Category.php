@@ -32,4 +32,16 @@ class Category extends Model
         'name',
         'slug',
     ];
+
+    /**
+     * Get the products that belong to this category.
+     *
+     * Products reference categories via category_slug → slug.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'category_slug', 'slug');
+    }
 }

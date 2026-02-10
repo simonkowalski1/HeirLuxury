@@ -23,6 +23,7 @@
                 <tr class="text-left text-xs uppercase text-zinc-400">
                     <th class="px-4 py-3">Name</th>
                     <th class="px-4 py-3">Slug</th>
+                    <th class="px-4 py-3 w-24 text-center">Products</th>
                     <th class="px-4 py-3 w-32 text-right">Actions</th>
                 </tr>
             </thead>
@@ -31,6 +32,12 @@
                 <tr class="border-t border-white/5 hover:bg-white/5">
                     <td class="px-4 py-3">{{ $category->name }}</td>
                     <td class="px-4 py-3 text-zinc-400">{{ $category->slug }}</td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="inline-flex items-center justify-center min-w-[24px] rounded-full px-2 py-0.5 text-xs font-medium
+                            {{ $category->products_count > 0 ? 'bg-amber-400/20 text-amber-300' : 'bg-zinc-800 text-zinc-500' }}">
+                            {{ $category->products_count }}
+                        </span>
+                    </td>
                     <td class="px-4 py-3 text-right space-x-2">
                         <a href="{{ route('admin.categories.edit', $category) }}"
                            class="text-xs text-amber-300 hover:text-amber-200">
@@ -50,7 +57,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td class="px-4 py-6 text-center text-zinc-400" colspan="3">
+                    <td class="px-4 py-6 text-center text-zinc-400" colspan="4">
                         No categories yet.
                     </td>
                 </tr>
