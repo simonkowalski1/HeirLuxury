@@ -19,6 +19,9 @@
         @method('PUT')
         @include('admin.products._form')
 
+        {{-- Image Gallery Section --}}
+        @include('admin.products._gallery')
+
         <div class="mt-6 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <button type="submit"

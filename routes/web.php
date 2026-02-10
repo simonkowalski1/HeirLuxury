@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ImportController as AdminImportController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\ProductImageController as AdminProductImageController;
 use App\Http\Controllers\CategoryController as FrontCategoryController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
@@ -173,6 +174,10 @@ Route::middleware(['auth', 'admin'])
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::delete('products/bulk', [AdminProductController::class, 'bulkDestroy'])->name('products.bulk-destroy');
         Route::resource('products', AdminProductController::class);
+        Route::post('products/{product}/images', [AdminProductImageController::class, 'store'])->name('products.images.store');
+        Route::delete('products/{product}/images/{image}', [AdminProductImageController::class, 'destroy'])->name('products.images.destroy');
+        Route::put('products/{product}/images/reorder', [AdminProductImageController::class, 'reorder'])->name('products.images.reorder');
+        Route::put('products/{product}/images/{image}/primary', [AdminProductImageController::class, 'setPrimary'])->name('products.images.primary');
         Route::resource('categories', AdminCategoryController::class);
         Route::get('activity-log', [AdminActivityLogController::class, 'index'])->name('activity-log.index');
         Route::get('import', [AdminImportController::class, 'index'])->name('import.index');

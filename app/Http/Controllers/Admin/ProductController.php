@@ -132,6 +132,7 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $categories = Category::orderBy('name')->get();
+        $product->load('images');
 
         return view('admin.products.edit', compact('product', 'categories'));
     }
@@ -190,6 +191,11 @@ class ProductController extends Controller
         // Clean up associated image file
         if ($product->image) {
             Storage::disk('public')->delete($product->image);
+        }
+
+        // Clean up gallery images from storage
+        foreach ($product->images as $image) {
+            Storage::disk('public')->delete($image->path);
         }
 
         $product->delete();

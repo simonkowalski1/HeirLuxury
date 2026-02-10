@@ -78,4 +78,24 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class, 'category_slug', 'slug');
     }
+
+    /**
+     * Get all gallery images for this product, ordered by sort position.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Get the primary gallery image for this product.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function primaryImage()
+    {
+        return $this->hasOne(ProductImage::class)->where('is_primary', true);
+    }
 }
