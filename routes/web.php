@@ -21,6 +21,7 @@
 use App\Http\Controllers\Admin\ActivityLogController as AdminActivityLogController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ImportController as AdminImportController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\CategoryController as FrontCategoryController;
 use App\Http\Controllers\ContactController;
@@ -174,6 +175,8 @@ Route::middleware(['auth', 'admin'])
         Route::resource('products', AdminProductController::class);
         Route::resource('categories', AdminCategoryController::class);
         Route::get('activity-log', [AdminActivityLogController::class, 'index'])->name('activity-log.index');
+        Route::get('import', [AdminImportController::class, 'index'])->name('import.index');
+        Route::post('import', [AdminImportController::class, 'run'])->name('import.run');
     });
 
 /*

@@ -32,6 +32,11 @@
        class="block px-3 py-2 rounded-lg hover:bg-white/5 @if(request()->routeIs('admin.activity-log.*')) bg-white/10 @endif">
         Activity Log
     </a>
+
+    <a href="{{ route('admin.import.index') }}"
+       class="block px-3 py-2 rounded-lg hover:bg-white/5 @if(request()->routeIs('admin.import.*')) bg-white/10 @endif">
+        Import Products
+    </a>
 </nav>
 
 
