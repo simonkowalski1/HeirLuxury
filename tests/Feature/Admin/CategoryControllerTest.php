@@ -221,4 +221,182 @@ class CategoryControllerTest extends TestCase
         $response->assertOk();
         $response->assertSeeText('Products');
     }
+
+    // ==================== Search ====================
+
+    public function test_search_filters_categories_by_name(): void
+    {
+        Category::factory()->create(['name' => 'Women Bags']);
+        Category::factory()->create(['name' => 'Men Shoes']);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.categories.index', ['search' => 'Women']));
+
+        $response->assertOk();
+        $response->assertSee('Women Bags');
+        $response->assertDontSee('Men Shoes');
+    }
+
+    public function test_search_filters_categories_by_slug(): void
+    {
+        Category::factory()->create(['name' => 'Women Bags', 'slug' => 'women-bags']);
+        Category::factory()->create(['name' => 'Men Shoes', 'slug' => 'men-shoes']);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.categories.index', ['search' => 'men-shoes']));
+
+        $response->assertOk();
+        $response->assertSee('Men Shoes');
+        $response->assertDontSee('Women Bags');
+    }
+
+    public function test_search_is_case_insensitive(): void
+    {
+        Category::factory()->create(['name' => 'Luxury Watches']);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.categories.index', ['search' => 'luxury']));
+
+        $response->assertOk();
+        $response->assertSee('Luxury Watches');
+    }
+
+    public function test_empty_search_returns_all_categories(): void
+    {
+        Category::factory()->count(3)->create();
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.categories.index', ['search' => '']));
+
+        $response->assertOk();
+        $response->assertViewHas('categories', function ($categories) {
+            return $categories->count() === 3;
+        });
+    }
+
+    // ==================== Filtering ====================
+
+    public function test_filter_has_products_shows_only_categories_with_products(): void
+    {
+        $withProducts = Category::factory()->create(['slug' => 'has-products']);
+        Product::factory()->create(['category_slug' => 'has-products']);
+
+        $empty = Category::factory()->create(['slug' => 'no-products']);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.categories.index', ['has_products' => '1']));
+
+        $response->assertOk();
+        $response->assertSee($withProducts->name);
+        $response->assertDontSee($empty->name);
+    }
+
+    public function test_filter_empty_shows_only_categories_without_products(): void
+    {
+        $withProducts = Category::factory()->create(['slug' => 'has-products']);
+        Product::factory()->create(['category_slug' => 'has-products']);
+
+        $empty = Category::factory()->create(['slug' => 'no-products']);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.categories.index', ['has_products' => '0']));
+
+        $response->assertOk();
+        $response->assertSee($empty->name);
+        $response->assertDontSee($withProducts->name);
+    }
+
+    // ==================== Sorting ====================
+
+    public function test_sort_by_name_ascending(): void
+    {
+        Category::factory()->create(['name' => 'Zebra']);
+        Category::factory()->create(['name' => 'Alpha']);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.categories.index', ['sort' => 'name', 'direction' => 'asc']));
+
+        $response->assertOk();
+        $response->assertSeeInOrder(['Alpha', 'Zebra']);
+    }
+
+    public function test_sort_by_name_descending(): void
+    {
+        Category::factory()->create(['name' => 'Alpha']);
+        Category::factory()->create(['name' => 'Zebra']);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.categories.index', ['sort' => 'name', 'direction' => 'desc']));
+
+        $response->assertOk();
+        $response->assertSeeInOrder(['Zebra', 'Alpha']);
+    }
+
+    public function test_sort_by_products_count(): void
+    {
+        $many = Category::factory()->create(['name' => 'Popular', 'slug' => 'popular']);
+        Product::factory()->count(10)->create(['category_slug' => 'popular']);
+
+        $few = Category::factory()->create(['name' => 'Niche', 'slug' => 'niche']);
+        Product::factory()->count(1)->create(['category_slug' => 'niche']);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.categories.index', ['sort' => 'products_count', 'direction' => 'desc']));
+
+        $response->assertOk();
+        $response->assertSeeInOrder(['Popular', 'Niche']);
+    }
+
+    public function test_default_sort_is_name_ascending(): void
+    {
+        Category::factory()->create(['name' => 'Zebra']);
+        Category::factory()->create(['name' => 'Alpha']);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.categories.index'));
+
+        $response->assertOk();
+        $response->assertSeeInOrder(['Alpha', 'Zebra']);
+    }
+
+    public function test_invalid_sort_column_falls_back_to_name(): void
+    {
+        Category::factory()->create(['name' => 'Zebra']);
+        Category::factory()->create(['name' => 'Alpha']);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.categories.index', ['sort' => 'malicious_column']));
+
+        $response->assertOk();
+        $response->assertSeeInOrder(['Alpha', 'Zebra']);
+    }
+
+    public function test_search_preserves_sort_params_in_pagination(): void
+    {
+        Category::factory()->count(25)->create();
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.categories.index', ['search' => 'test', 'sort' => 'name', 'direction' => 'desc']));
+
+        $response->assertOk();
+    }
+
+    public function test_search_and_filter_can_combine(): void
+    {
+        $match = Category::factory()->create(['name' => 'Luxury Bags', 'slug' => 'luxury-bags']);
+        Product::factory()->create(['category_slug' => 'luxury-bags']);
+
+        $noProducts = Category::factory()->create(['name' => 'Luxury Shoes', 'slug' => 'luxury-shoes']);
+
+        $wrongName = Category::factory()->create(['name' => 'Men Watches', 'slug' => 'men-watches']);
+        Product::factory()->create(['category_slug' => 'men-watches']);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.categories.index', ['search' => 'Luxury', 'has_products' => '1']));
+
+        $response->assertOk();
+        $response->assertSee('Luxury Bags');
+        $response->assertDontSee('Luxury Shoes');
+        $response->assertDontSee('Men Watches');
+    }
 }

@@ -28,15 +28,39 @@ use Illuminate\Support\Str;
 class CategoryController extends Controller
 {
     /**
-     * Display paginated list of all categories.
+     * Display paginated list of categories with search, filter, and sort.
      *
      * @return \Illuminate\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::withCount('products')->orderBy('name')->paginate(20);
+        $query = Category::withCount('products');
 
-        return view('admin.categories.index', compact('categories'));
+        // Search by name or slug
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('slug', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by product presence (uses subquery to avoid SQLite HAVING issues)
+        if ($request->has('has_products') && $request->get('has_products') !== '') {
+            if ($request->get('has_products') === '1') {
+                $query->whereHas('products');
+            } else {
+                $query->whereDoesntHave('products');
+            }
+        }
+
+        // Sortable columns (whitelist to prevent SQL injection)
+        $sortableColumns = ['name', 'slug', 'products_count', 'created_at'];
+        $sort = in_array($request->get('sort'), $sortableColumns) ? $request->get('sort') : 'name';
+        $direction = $request->get('direction') === 'desc' ? 'desc' : 'asc';
+
+        $categories = $query->orderBy($sort, $direction)->paginate(20)->withQueryString();
+
+        return view('admin.categories.index', compact('categories', 'sort', 'direction'));
     }
 
     /**
