@@ -80,7 +80,7 @@ Make sure `.gitignore` includes these.
 ### 2.1 Create Service Account
 
 1. Go to https://console.cloud.google.com/iam-admin/serviceaccounts
-2. Select your project: `spiritual-grove-479823-k1`
+2. Select your project: `YOUR_GCP_PROJECT_ID`
 3. Click "Create Service Account"
    - Name: `heirluxury-production`
    - Description: `Service account for HeirLuxury production storage`
@@ -100,7 +100,7 @@ Make sure `.gitignore` includes these.
 ### 2.3 Make Images Public
 
 ```bash
-gsutil iam ch allUsers:objectViewer gs://spiritual-grove-479823-k1-storage
+gsutil iam ch allUsers:objectViewer gs://YOUR_GCP_PROJECT_ID-storage
 ```
 
 This allows images to be publicly accessible via CDN.
@@ -255,8 +255,8 @@ DB_PASSWORD=FORGE_SETS_THIS_AUTOMATICALLY
 
 FILESYSTEM_DISK=gcs
 
-GOOGLE_CLOUD_PROJECT_ID=spiritual-grove-479823-k1
-GOOGLE_CLOUD_STORAGE_BUCKET=spiritual-grove-479823-k1-storage
+GOOGLE_CLOUD_PROJECT_ID=YOUR_GCP_PROJECT_ID
+GOOGLE_CLOUD_STORAGE_BUCKET=YOUR_GCP_PROJECT_ID-storage
 GOOGLE_CLOUD_KEY_FILE=/home/forge/yourdomain.com/storage/gcs-service-account.json
 
 CACHE_STORE=redis
@@ -266,10 +266,10 @@ QUEUE_CONNECTION=redis
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=<your-gmail-address>
-MAIL_PASSWORD=<your-gmail-app-password>
+MAIL_USERNAME=    # Your Gmail address (set in Forge env, NOT here)
+MAIL_PASSWORD=    # Your Gmail app password (set in Forge env, NOT here)
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS="noreply@<your-domain>"
+MAIL_FROM_ADDRESS= # noreply@yourdomain.com
 MAIL_FROM_NAME="${APP_NAME}"
 ```
 
@@ -482,7 +482,7 @@ Then deploy again.
   - Browser Cache TTL: 1 month
 
 **Rule 2: Cache GCS Images**
-- URL: `storage.googleapis.com/spiritual-grove-479823-k1-storage/*`
+- URL: `storage.googleapis.com/YOUR_GCP_PROJECT_ID-storage/*`
 - Settings:
   - Cache Level: Cache Everything
   - Edge Cache TTL: 1 year
